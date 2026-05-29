@@ -1,7 +1,7 @@
 from django.db import models
-from clientes.models import Cliente
-from empleados.models import Empleado
-from trabajos.models import Trabajo
+from apps.clientes.models import Cliente
+from apps.empleados.models import Empleado
+from apps.trabajos.models import Trabajo
 
 
 class AgendaCita(models.Model):

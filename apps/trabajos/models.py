@@ -1,8 +1,8 @@
 
 from django.db import models
-from clientes.models import Propiedad
-from servicios.models import Servicio, Tarifa
-from empleados.models import Empleado
+from apps.clientes.models import Propiedad
+from apps.servicios.models import Servicio, Tarifa
+from apps.empleados.models import Empleado
 
 
 class Trabajo(models.Model):

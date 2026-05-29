@@ -1,5 +1,5 @@
 from django.db import models
-from facturacion.models import Factura
+from apps.facturacion.models import Factura
 
 
 class MetodoPago(models.Model):

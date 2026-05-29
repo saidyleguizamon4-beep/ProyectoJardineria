@@ -26,3 +26,30 @@ class Cliente(models.Model):
     
     def __str__(self):
         return f"{self.nombre} {self.apellido}"
+class Propiedad(models.Model):
+    """Modelo de propiedades"""
+    
+    id_propiedad = models.AutoField(primary_key=True)
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.CASCADE,
+        related_name='propiedades'
+    )
+    direccion = models.CharField(max_length=300)
+    tipo = models.CharField(max_length=50)
+    tamano = models.DecimalField(max_digits=10, decimal_places=2)
+    numero_habitaciones = models.PositiveIntegerField(default=1)
+    numero_banos = models.PositiveIntegerField(default=1)
+    tiene_piscina = models.BooleanField(default=False)
+    tiene_jardin = models.BooleanField(default=False)
+    observaciones = models.TextField(blank=True)
+    fecha_alta = models.DateTimeField(auto_now_add=True)
+    activo = models.BooleanField(default=True)
+    
+    class Meta:
+        db_table = 'PROPIEDAD'
+        verbose_name = 'Propiedad'
+        verbose_name_plural = 'Propiedades'
+    
+    def __str__(self):
+        return f"{self.direccion} - {self.cliente.nombre}"

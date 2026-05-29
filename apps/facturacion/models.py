@@ -1,5 +1,6 @@
 from django.db import models
-from trabajos.models import Trabajo
+from apps.trabajos.models import Trabajo
+
 
 
 class Factura(models.Model):
