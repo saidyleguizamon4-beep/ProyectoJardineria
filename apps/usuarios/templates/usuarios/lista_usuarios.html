@@ -1,79 +1,131 @@
-<!-- usuarios/templates/usuarios/lista_usuarios.html -->
 {% extends 'base.html' %}
 
-{% block title %}Lista de Usuarios{% endblock %}
+{% block title %}Lista de Usuarios - Jardinería Bogotá{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Lista de Usuarios</h2>
+    <div>
+        <h2><i class="fas fa-users"></i> Gestión de Usuarios</h2>
+        <p class="text-muted mb-0">Administre los usuarios del sistema</p>
+    </div>
     <a href="{% url 'usuarios:crear_usuario' %}" class="btn btn-success">
         <i class="fas fa-plus"></i> Nuevo Usuario
     </a>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+<div class="row">
+    <!-- Tarjetas de resumen -->
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-primary"></i>
+                <h3 class="my-2">{{ usuarios.count }}</h3>
+                <p class="mb-0">Total Usuarios</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user-check fa-2x text-success"></i>
+                <h3 class="my-2">{{ usuarios.count }}</h3>
+                <p class="mb-0">Usuarios Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user-shield fa-2x text-info"></i>
+                <h3 class="my-2">4</h3>
+                <p class="mb-0">Roles</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar-check fa-2x text-warning"></i>
+                <h3 class="my-2">12</h3>
+                <p class="mb-0">Conexiones Hoy</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="card">
+<!-- Tabla de usuarios -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Usuarios</h5>
+    </div>
     <div class="card-body">
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Último Login</th>
-                    <th>Acciones</th>
+                    <th><i class="fas fa-hashtag"></i> ID</th>
+                    <th><i class="fas fa-user"></i> Usuario</th>
+                    <th><i class="fas fa-user-tag"></i> Rol</th>
+                    <th><i class="fas fa-toggle-on"></i> Estado</th>
+                    <th><i class="fas fa-clock"></i> Último Login</th>
+                    <th><i class="fas fa-cogs"></i> Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for usuario in usuarios %}
                 <tr>
                     <td>{{ usuario.id_usuario }}</td>
-                    <td>{{ usuario.username }}</td>
                     <td>
-                        <span class="badge bg-info">{{ usuario.rol }}</span>
+                        <i class="fas fa-user-circle text-primary me-2"></i>
+                        <strong>{{ usuario.username }}</strong>
+                    </td>
+                    <td>
+                        <span class="badge bg-info">{{ usuario.rol.nombre_rol }}</span>
                     </td>
                     <td>
                         {% if usuario.autenticacion %}
-                            <span class="badge bg-success">Activo</span>
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Activo
+                            </span>
                         {% else %}
-                            <span class="badge bg-danger">Inactivo</span>
+                            <span class="badge bg-danger">
+                                <i class="fas fa-times"></i> Inactivo
+                            </span>
                         {% endif %}
                     </td>
                     <td>
                         {% if usuario.ultimo_login %}
                             {{ usuario.ultimo_login|date:"d/m/Y H:i" }}
                         {% else %}
-                            Nunca
+                            <span class="text-muted">Nunca</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'usuarios:detalle_usuario' usuario.id_usuario %}" 
-                           class="btn btn-sm btn-primary" title="Ver">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{% url 'usuarios:editar_usuario' usuario.id_usuario %}" 
-                           class="btn btn-sm btn-warning" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'usuarios:cambiar_password' usuario.id_usuario %}" 
-                           class="btn btn-sm btn-info" title="Cambiar Contraseña">
-                            <i class="fas fa-key"></i>
-                        </a>
-                        <a href="{% url 'usuarios:eliminar_usuario' usuario.id_usuario %}" 
-                           class="btn btn-sm btn-danger" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <div class="btn-group">
+                            <a href="{% url 'usuarios:detalle_usuario' usuario.id_usuario %}" 
+                               class="btn btn-sm btn-primary" title="Ver">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'usuarios:editar_usuario' usuario.id_usuario %}" 
+                               class="btn btn-sm btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'usuarios:cambiar_password' usuario.id_usuario %}" 
+                               class="btn btn-sm btn-info" title="Cambiar Contraseña">
+                                <i class="fas fa-key"></i>
+                            </a>
+                            <a href="{% url 'usuarios:eliminar_usuario' usuario.id_usuario %}" 
+                               class="btn btn-sm btn-danger" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center">No hay usuarios registrados</td>
+                    <td colspan="6" class="text-center">
+                        <i class="fas fa-user-slash fa-2x text-muted"></i>
+                        <p class="mt-2">No hay usuarios registrados</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

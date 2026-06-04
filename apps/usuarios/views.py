@@ -1,14 +1,17 @@
 # usuarios/views.py
 # usuarios/views.py
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+import hashlib
 from .models import Usuario, Roles
 
+
+# =============================================================================
+# AUTENTICACIÓN
+# =============================================================================
 
 def login_view(request):
     """Vista para iniciar sesión"""
@@ -21,46 +24,77 @@ def login_view(request):
             messages.error(request, 'Por favor ingrese usuario y contraseña')
             return render(request, 'usuarios/login.html')
         
-        # Autenticar usuario
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            if user.autenticacion:
-                login(request, user)
-                
-                # Actualizar último login
-                user.ultimo_login = timezone.now()
-                user.save(update_fields=['ultimo_login'])
-                
-                messages.success(request, f'Bienvenido {user.username}')
-                return redirect('usuarios:lista_usuarios')
-            else:
-                messages.error(request, 'Usuario no autorizado para iniciar sesión')
-        else:
+        # Buscar usuario
+        try:
+            usuario = Usuario.objects.get(username=username)
+        except Usuario.DoesNotExist:
             messages.error(request, 'Usuario o contraseña incorrectos')
+            return render(request, 'usuarios/login.html')
+        
+        # Verificar si está activo
+        if not usuario.autenticacion:
+            messages.error(request, 'Usuario no autorizado para iniciar sesión')
+            return render(request, 'usuarios/login.html')
+        
+        # Verificar contraseña (comparación simple)
+        if password != usuario.password:
+            messages.error(request, 'Usuario o contraseña incorrectos')
+            return render(request, 'usuarios/login.html')
+        
+        # Crear sesión
+        request.session['usuario_id'] = usuario.id_usuario
+        request.session['username'] = usuario.username
+        request.session['rol'] = usuario.rol.nombre_rol if usuario.rol else ''
+        request.session['logged_in'] = True
+        
+        # Actualizar último login
+        usuario.ultimo_login = timezone.now()
+        usuario.save(update_fields=['ultimo_login'])
+        
+        messages.success(request, f'Bienvenido {usuario.username}')
+        return redirect('usuarios:lista_usuarios')
     
     return render(request, 'usuarios/login.html')
 
 
 def logout_view(request):
     """Vista para cerrar sesión"""
-    logout(request)
+    request.session.flush()
     messages.success(request, 'Sesión cerrada correctamente')
     return redirect('usuarios:login')
 
 
-@login_required
+# =============================================================================
+# DECORADOR PARA VERIFICAR SESIÓN
+# =============================================================================
+
+def verificar_sesion(view_func):
+    """Decorador para verificar si hay sesión activa"""
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get('logged_in'):
+            messages.error(request, 'Debe iniciar sesión')
+            return redirect('usuarios:login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+# =============================================================================
+# GESTIÓN DE USUARIOS
+# =============================================================================
+
+@verificar_sesion
 def lista_usuarios(request):
     """Vista para listar usuarios"""
     usuarios = Usuario.objects.select_related('rol').all().order_by('-fecha_registro')
-    return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios})
+    return render(request, 'usuarios/lista_usuarios.html', {
+        'usuarios': usuarios
+    })
 
 
-@login_required
+@verificar_sesion
 def crear_usuario(request):
     """Vista para crear nuevo usuario"""
-    
-    roles = Roles.objects.filter(activo=True)
+    roles = Roles.objects.all()
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -85,37 +119,52 @@ def crear_usuario(request):
         if not rol_id:
             errores.append('El rol es requerido')
         
-        try:
-            rol = Roles.objects.get(id_rol=rol_id)
-        except Roles.DoesNotExist:
-            errores.append('El rol seleccionado no es válido')
-        
         if errores:
             for error in errores:
                 messages.error(request, error)
-            return render(request, 'usuarios/form_usuario.html', {'roles': roles})
+            return render(request, 'usuarios/form_usuario.html', {
+                'roles': roles
+            })
+        
+        # Buscar rol
+        try:
+            rol = Roles.objects.get(id_rol=rol_id)
+        except Roles.DoesNotExist:
+            messages.error(request, 'El rol seleccionado no existe')
+            return render(request, 'usuarios/form_usuario.html', {
+                'roles': roles
+            })
         
         # Crear usuario
-        usuario = Usuario.objects.create_user(
+        Usuario.objects.create(
             username=username,
-            password=password
+            password=password,
+            rol=rol,
+            autenticacion=bool(autenticacion)
         )
-        usuario.rol = rol
-        usuario.autenticacion = bool(autenticacion)
-        usuario.save()
         
         messages.success(request, 'Usuario creado correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/form_usuario.html', {'roles': roles})
+    return render(request, 'usuarios/form_usuario.html', {
+        'roles': roles
+    })
 
 
-@login_required
+@verificar_sesion
+def detalle_usuario(request, pk):
+    """Vista para ver detalles de usuario"""
+    usuario = get_object_or_404(Usuario.objects.select_related('rol'), pk=pk)
+    return render(request, 'usuarios/detalle_usuario.html', {
+        'usuario': usuario
+    })
+
+
+@verificar_sesion
 def editar_usuario(request, pk):
     """Vista para editar usuario"""
-    
     usuario = get_object_or_404(Usuario, pk=pk)
-    roles = Roles.objects.filter(activo=True)
+    roles = Roles.objects.all()
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -130,14 +179,18 @@ def editar_usuario(request, pk):
         if Usuario.objects.filter(username=username).exclude(pk=pk).exists():
             errores.append('El nombre de usuario ya existe')
         
-        try:
-            rol = Roles.objects.get(id_rol=rol_id)
-        except Roles.DoesNotExist:
-            errores.append('El rol seleccionado no es válido')
-        
         if errores:
             for error in errores:
                 messages.error(request, error)
+            return render(request, 'usuarios/form_usuario.html', {
+                'usuario': usuario,
+                'roles': roles
+            })
+        
+        try:
+            rol = Roles.objects.get(id_rol=rol_id)
+        except Roles.DoesNotExist:
+            messages.error(request, 'El rol seleccionado no existe')
             return render(request, 'usuarios/form_usuario.html', {
                 'usuario': usuario,
                 'roles': roles
@@ -158,36 +211,39 @@ def editar_usuario(request, pk):
     })
 
 
-@login_required
+@verificar_sesion
 def eliminar_usuario(request, pk):
     """Vista para eliminar usuario"""
-    
     usuario = get_object_or_404(Usuario, pk=pk)
     
+    # No permitir eliminarse a sí mismo
+    session_user_id = request.session.get('usuario_id')
+    if session_user_id == usuario.id_usuario:
+        messages.error(request, 'No puedes eliminarte a ti mismo')
+        return redirect('usuarios:lista_usuarios')
+    
     if request.method == 'POST':
-        if request.user.id_usuario == usuario.id_usuario:
-            messages.error(request, 'No puedes eliminarte a ti mismo')
-            return redirect('usuarios:lista_usuarios')
-        
         usuario.delete()
         messages.success(request, 'Usuario eliminado correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/confirmar_eliminar.html', {'usuario': usuario})
+    return render(request, 'usuarios/confirmar_eliminar.html', {
+        'usuario': usuario
+    })
 
 
-@login_required
-def detalle_usuario(request, pk):
-    """Vista para ver detalles de usuario"""
-    usuario = get_object_or_404(Usuario.objects.select_related('rol'), pk=pk)
-    return render(request, 'usuarios/detalle_usuario.html', {'usuario': usuario})
-
-
-@login_required
+@verificar_sesion
 def cambiar_password(request, pk):
     """Vista para cambiar contraseña"""
-    
     usuario = get_object_or_404(Usuario, pk=pk)
+    
+    # Verificar que sea el mismo usuario o admin
+    session_user_id = request.session.get('usuario_id')
+    session_rol = request.session.get('rol')
+    
+    if session_user_id != usuario.id_usuario and session_rol != 'admin':
+        messages.error(request, 'No tienes permisos para cambiar esta contraseña')
+        return redirect('usuarios:lista_usuarios')
     
     if request.method == 'POST':
         password_actual = request.POST.get('password_actual', '').strip()
@@ -196,7 +252,8 @@ def cambiar_password(request, pk):
         
         errores = []
         
-        if not usuario.check_password(password_actual):
+        # Verificar contraseña actual
+        if password_actual != usuario.password:
             errores.append('La contraseña actual es incorrecta')
         if len(password_nueva) < 6:
             errores.append('La nueva contraseña debe tener al menos 6 caracteres')
@@ -206,12 +263,49 @@ def cambiar_password(request, pk):
         if errores:
             for error in errores:
                 messages.error(request, error)
-            return render(request, 'usuarios/cambiar_password.html', {'usuario': usuario})
+            return render(request, 'usuarios/cambiar_password.html', {
+                'usuario': usuario
+            })
         
-        usuario.set_password(password_nueva)
+        # Cambiar contraseña
+        usuario.password = password_nueva
         usuario.save()
         
         messages.success(request, 'Contraseña cambiada correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/cambiar_password.html', {'usuario': usuario})
+    return render(request, 'usuarios/cambiar_password.html', {
+        'usuario': usuario
+    })
+
+
+# =============================================================================
+# GESTIÓN DE ROLES
+# =============================================================================
+
+@verificar_sesion
+def lista_roles(request):
+    """Vista para listar roles"""
+    roles = Roles.objects.all().order_by('nombre_rol')
+    return render(request, 'usuarios/lista_roles.html', {
+        'roles': roles
+    })
+
+
+@verificar_sesion
+def crear_rol(request):
+    """Vista para crear rol"""
+    if request.method == 'POST':
+        nombre_rol = request.POST.get('nombre_rol', '').strip()
+        descripcion = request.POST.get('descripcion', '').strip()
+        
+        if not nombre_rol:
+            messages.error(request, 'El nombre del rol es requerido')
+        elif Roles.objects.filter(nombre_rol=nombre_rol).exists():
+            messages.error(request, 'El rol ya existe')
+        else:
+            Roles.objects.create(nombre_rol=nombre_rol, descripcion=descripcion)
+            messages.success(request, 'Rol creado correctamente')
+            return redirect('usuarios:lista_roles')
+    
+    return render(request, 'usuarios/form_rol.html')

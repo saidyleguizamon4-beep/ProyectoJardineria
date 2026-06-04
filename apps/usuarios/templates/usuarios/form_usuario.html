@@ -1,32 +1,40 @@
 
 {% extends 'base.html' %}
 
-{% block title %}{% if usuario %}Editar{% else %}Crear{% endif %} Usuario{% endblock %}
+{% block title %}{% if usuario %}Editar{% else %}Crear{% endif %} Usuario - Jardinería Bogotá{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-user-plus"></i> {% if usuario %}Editar{% else %}Nuevo{% endif %} Usuario</h2>
+        <p class="text-muted mb-0">Complete los datos del formulario</p>
+    </div>
+    <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h4 class="mb-0">
-                    {% if usuario %}Editar Usuario{% else %}Crear Nuevo Usuario{% endif %}
-                </h4>
+                <h5 class="mb-0"><i class="fas fa-user"></i> Datos del Usuario</h5>
             </div>
             <div class="card-body">
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-                
                 <form method="post">
                     {% csrf_token %}
                     
                     <div class="mb-3">
                         <label class="form-label">Usuario *</label>
-                        <input type="text" name="username" class="form-control" 
-                               value="{{ usuario.username|default:'' }}" required>
-                        <div class="form-text">Ingrese un nombre de usuario único</div>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" name="username" class="form-control" 
+                                   value="{{ usuario.username|default:'' }}" 
+                                   placeholder="Ingrese nombre de usuario" required>
+                        </div>
+                        <div class="form-text">Nombre único para iniciar sesión</div>
                     </div>
                     
                     {% if not usuario %}
@@ -34,13 +42,25 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Contraseña *</label>
-                                <input type="password" name="password" class="form-control" required>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    <input type="password" name="password" class="form-control" 
+                                           placeholder="Mínimo 6 caracteres" required>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Confirmar Contraseña *</label>
-                                <input type="password" name="password_confirm" class="form-control" required>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    <input type="password" name="password_confirm" class="form-control" 
+                                           placeholder="Repita la contraseña" required>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -48,34 +68,63 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Rol *</label>
-                        <select name="rol" class="form-select" required>
-                            <option value="">Seleccione un rol</option>
-                            <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
-                            <option value="supervisor" {% if usuario.rol == 'supervisor' %}selected{% endif %}>Supervisor</option>
-                            <option value="empleado" {% if usuario.rol == 'empleado' %}selected{% endif %}>Empleado</option>
-                            <option value="cliente" {% if usuario.rol == 'cliente' %}selected{% endif %}>Cliente</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Permisos</label>
-                        <textarea name="permisos" class="form-control" rows="3">{{ usuario.permisos|default:'' }}</textarea>
-                        <div class="form-text">Ingrese los permisos separados por comas</div>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user-tag"></i>
+                            </span>
+                            <select name="rol" class="form-select" required>
+                                <option value="">Seleccione un rol</option>
+                                {% for r in roles %}
+                                <option value="{{ r.id_rol }}" {% if usuario.rol_id == r.id_rol %}selected{% endif %}>
+                                    {{ r.nombre_rol }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="mb-3 form-check">
                         <input type="checkbox" name="autenticacion" class="form-check-input" 
                                id="autenticacion" {% if usuario.autenticacion %}checked{% endif %}>
-                        <label class="form-check-label" for="autenticacion">Autenticación Activa</label>
+                        <label class="form-check-label" for="autenticacion">
+                            <i class="fas fa-toggle-on"></i> Usuario puede iniciar sesión
+                        </label>
                     </div>
                     
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">
-                            {% if usuario %}Guardar Cambios{% else %}Crear Usuario{% endif %}
+                            <i class="fas fa-save"></i> {% if usuario %}Guardar Cambios{% else %}Crear Usuario{% endif %}
                         </button>
-                        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+                        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+                            Cancelar
+                        </a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Roles disponibles:</strong></p>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <i class="fas fa-crown text-warning"></i> Administrador
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-user-tie text-info"></i> Supervisor
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-hard-hat text-success"></i> Empleado
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-user-friends text-primary"></i> Cliente
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
