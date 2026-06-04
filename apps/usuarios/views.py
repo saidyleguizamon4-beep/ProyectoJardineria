@@ -1,4 +1,5 @@
 # usuarios/views.py
+# usuarios/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,7 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from .models import Usuario
+from .models import Usuario, Roles
 
 
 def login_view(request):
@@ -14,8 +15,7 @@ def login_view(request):
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '')
-        remember_me = request.POST.get('remember_me', False)
+        password = request.POST.get('password', '').strip()
         
         if not username or not password:
             messages.error(request, 'Por favor ingrese usuario y contraseña')
@@ -44,7 +44,6 @@ def login_view(request):
 
 def logout_view(request):
     """Vista para cerrar sesión"""
-    
     logout(request)
     messages.success(request, 'Sesión cerrada correctamente')
     return redirect('usuarios:login')
@@ -53,24 +52,21 @@ def logout_view(request):
 @login_required
 def lista_usuarios(request):
     """Vista para listar usuarios"""
-    
-    usuarios = Usuario.objects.all().order_by('-fecha_registro')
-    
-    return render(request, 'usuarios/lista_usuarios.html', {
-        'usuarios': usuarios
-    })
+    usuarios = Usuario.objects.select_related('rol').all().order_by('-fecha_registro')
+    return render(request, 'usuarios/lista_usuarios.html', {'usuarios': usuarios})
 
 
 @login_required
 def crear_usuario(request):
     """Vista para crear nuevo usuario"""
     
+    roles = Roles.objects.filter(activo=True)
+    
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '').strip()
         password_confirm = request.POST.get('password_confirm', '').strip()
-        rol = request.POST.get('rol', '').strip()
-        permisos = request.POST.get('permisos', '').strip()
+        rol_id = request.POST.get('rol', '').strip()
         autenticacion = request.POST.get('autenticacion', False)
         
         # Validaciones
@@ -86,13 +82,18 @@ def crear_usuario(request):
             errores.append('La contraseña debe tener al menos 6 caracteres')
         if password != password_confirm:
             errores.append('Las contraseñas no coinciden')
-        if not rol:
+        if not rol_id:
             errores.append('El rol es requerido')
+        
+        try:
+            rol = Roles.objects.get(id_rol=rol_id)
+        except Roles.DoesNotExist:
+            errores.append('El rol seleccionado no es válido')
         
         if errores:
             for error in errores:
                 messages.error(request, error)
-            return render(request, 'usuarios/form_usuario.html')
+            return render(request, 'usuarios/form_usuario.html', {'roles': roles})
         
         # Crear usuario
         usuario = Usuario.objects.create_user(
@@ -100,14 +101,13 @@ def crear_usuario(request):
             password=password
         )
         usuario.rol = rol
-        usuario.permisos = permisos
         usuario.autenticacion = bool(autenticacion)
         usuario.save()
         
         messages.success(request, 'Usuario creado correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/form_usuario.html')
+    return render(request, 'usuarios/form_usuario.html', {'roles': roles})
 
 
 @login_required
@@ -115,11 +115,11 @@ def editar_usuario(request, pk):
     """Vista para editar usuario"""
     
     usuario = get_object_or_404(Usuario, pk=pk)
+    roles = Roles.objects.filter(activo=True)
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
-        rol = request.POST.get('rol', '').strip()
-        permisos = request.POST.get('permisos', '').strip()
+        rol_id = request.POST.get('rol', '').strip()
         autenticacion = request.POST.get('autenticacion', False)
         
         # Validaciones
@@ -130,17 +130,22 @@ def editar_usuario(request, pk):
         if Usuario.objects.filter(username=username).exclude(pk=pk).exists():
             errores.append('El nombre de usuario ya existe')
         
+        try:
+            rol = Roles.objects.get(id_rol=rol_id)
+        except Roles.DoesNotExist:
+            errores.append('El rol seleccionado no es válido')
+        
         if errores:
             for error in errores:
                 messages.error(request, error)
             return render(request, 'usuarios/form_usuario.html', {
-                'usuario': usuario
+                'usuario': usuario,
+                'roles': roles
             })
         
         # Actualizar usuario
         usuario.username = username
         usuario.rol = rol
-        usuario.permisos = permisos
         usuario.autenticacion = bool(autenticacion)
         usuario.save()
         
@@ -148,7 +153,8 @@ def editar_usuario(request, pk):
         return redirect('usuarios:lista_usuarios')
     
     return render(request, 'usuarios/form_usuario.html', {
-        'usuario': usuario
+        'usuario': usuario,
+        'roles': roles
     })
 
 
@@ -159,7 +165,6 @@ def eliminar_usuario(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     
     if request.method == 'POST':
-        # No permitir eliminarse a sí mismo
         if request.user.id_usuario == usuario.id_usuario:
             messages.error(request, 'No puedes eliminarte a ti mismo')
             return redirect('usuarios:lista_usuarios')
@@ -168,9 +173,14 @@ def eliminar_usuario(request, pk):
         messages.success(request, 'Usuario eliminado correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/confirmar_eliminar.html', {
-        'usuario': usuario
-    })
+    return render(request, 'usuarios/confirmar_eliminar.html', {'usuario': usuario})
+
+
+@login_required
+def detalle_usuario(request, pk):
+    """Vista para ver detalles de usuario"""
+    usuario = get_object_or_404(Usuario.objects.select_related('rol'), pk=pk)
+    return render(request, 'usuarios/detalle_usuario.html', {'usuario': usuario})
 
 
 @login_required
@@ -184,7 +194,6 @@ def cambiar_password(request, pk):
         password_nueva = request.POST.get('password_nueva', '').strip()
         password_nueva_confirm = request.POST.get('password_nueva_confirm', '').strip()
         
-        # Validaciones
         errores = []
         
         if not usuario.check_password(password_actual):
@@ -197,41 +206,12 @@ def cambiar_password(request, pk):
         if errores:
             for error in errores:
                 messages.error(request, error)
-            return render(request, 'usuarios/cambiar_password.html', {
-                'usuario': usuario
-            })
+            return render(request, 'usuarios/cambiar_password.html', {'usuario': usuario})
         
-        # Cambiar contraseña
         usuario.set_password(password_nueva)
         usuario.save()
         
         messages.success(request, 'Contraseña cambiada correctamente')
         return redirect('usuarios:lista_usuarios')
     
-    return render(request, 'usuarios/cambiar_password.html', {
-        'usuario': usuario
-    })
-
-
-@login_required
-def detalle_usuario(request, pk):
-    """Vista para ver detalles de usuario"""
-    
-    usuario = get_object_or_404(Usuario, pk=pk)
-    
-    return render(request, 'usuarios/detalle_usuario.html', {
-        'usuario': usuario
-    })
-
-
-@require_http_methods(["POST"])
-def validar_username(request):
-    """API para validar si username existe"""
-    
-    username = request.POST.get('username', '').strip()
-    existe = Usuario.objects.filter(username=username).exists()
-    
-    return JsonResponse({
-        'existe': existe,
-        'mensaje': 'El nombre de usuario ya existe' if existe else 'Usuario disponible'
-    })
+    return render(request, 'usuarios/cambiar_password.html', {'usuario': usuario})
