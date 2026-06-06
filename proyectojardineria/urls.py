@@ -21,5 +21,14 @@ from apps.usuarios import views
 urlpatterns = [
     path('admin/', admin.site.urls), 
     path('', views.login_view, name='login'), 
-    path('usuarios/', include('apps.usuarios.urls'))
+    path('usuarios/', include('apps.usuarios.urls')),
+    path('clientes/', include('apps.clientes.urls')),
+    path('empleados/', include('apps.empleados.urls')),
+    path('servicios/', include('servicios.urls')),
+
+
 ]
+# proyecto/urls.py
+from django.contrib import admin
+from django.urls import path, include
+

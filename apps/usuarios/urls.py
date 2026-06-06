@@ -21,5 +21,4 @@ urlpatterns = [
     path('roles/', views.lista_roles, name='lista_roles'),
     path('roles/crear/', views.crear_rol, name='crear_rol'),
     
-    
 ]

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Servicios - Jardinería Bogotá{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-concierge-bell"></i> Gestión de Servicios</h2>
+        <p class="text-muted mb-0">Catálogo de servicios disponibles</p>
+    </div>
+    <div>
+        <a href="{% url 'servicios:lista_tarifas' %}" class="btn btn-info">
+            <i class="fas fa-tags"></i> Tarifas
+        </a>
+        <a href="{% url 'servicios:crear_servicio' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nuevo Servicio
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-concierge-bell fa-2x text-primary"></i>
+                <h3>{{ servicios.count }}</h3>
+                <p class="mb-0">Servicios</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-success"></i>
+                <h3>{{ servicios.count }}</h3>
+                <p class="mb-0">Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-tags fa-2x text-warning"></i>
+                <h3>0</h3>
+                <p class="mb-0">Tarifas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Servicios</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Servicio</th>
+                    <th>Descripción</th>
+                    <th>Duración</th>
+                    <th>Tarifas</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servicio in servicios %}
+                <tr>
+                    <td>{{ servicio.id_servicio }}</td>
+                    <td><strong>{{ servicio.nombre }}</strong></td>
+                    <td>{{ servicio.descripcion|truncatechars:50 }}</td>
+                    <td>{{ servicio.duracion_estimada_minutos }} min</td>
+                    <td><span class="badge bg-info">{{ servicio.tarifas.count }}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{% url 'servicios:detalle_servicio' servicio.id_servicio %}" 
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'servicios:editar_servicio' servicio.id_servicio %}" 
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'servicios:eliminar_servicio' servicio.id_servicio %}" 
+                               class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No hay servicios registrados</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

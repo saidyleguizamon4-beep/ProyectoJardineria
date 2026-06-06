@@ -1,0 +1,100 @@
+<!-- clientes/templates/clientes/form_cliente.html -->
+{% extends 'base.html' %}
+
+{% block title %}{% if cliente %}Editar{% else %}Nuevo{% endif %} Cliente{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-user-plus"></i> {% if cliente %}Editar{% else %}Nuevo{% endif %} Cliente</h2>
+        <p class="text-muted mb-0">Complete los datos del formulario</p>
+    </div>
+    <a href="{% url 'clientes:lista_clientes' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Datos del Cliente</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" name="nombre" class="form-control" 
+                                       value="{{ cliente.nombre|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Apellido *</label>
+                                <input type="text" name="apellido" class="form-control" 
+                                       value="{{ cliente.apellido|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" name="email" class="form-control" 
+                                       value="{{ cliente.email|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" name="telefono" class="form-control" 
+                                       value="{{ cliente.telefono|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Dirección</label>
+                        <textarea name="direccion" class="form-control" rows="2">{{ cliente.direccion|default:'' }}</textarea>
+                    </div>
+                    
+                    {% if cliente %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="activo" class="form-check-input" 
+                               id="activo" {% if cliente.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">Cliente activo</label>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if cliente %}Guardar{% else %}Crear{% endif %}
+                        </button>
+                        <a href="{% url 'clientes:lista_clientes' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Total clientes:</strong> {{ clientes.count|default:0 }}</p>
+                <hr>
+                <p class="text-muted">
+                    <i class="fas fa-lightbulb"></i> Los campos marcados con * son obligatorios.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

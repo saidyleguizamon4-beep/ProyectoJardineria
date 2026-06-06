@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if empleado %}Editar{% else %}Nuevo{% endif %} Empleado{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-user-plus"></i> {% if empleado %}Editar{% else %}Nuevo{% endif %} Empleado</h2>
+    </div>
+    <a href="{% url 'empleados:lista_empleados' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Datos del Empleado</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" name="nombre" class="form-control" 
+                                       value="{{ empleado.nombre|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Apellido *</label>
+                                <input type="text" name="apellido" class="form-control" 
+                                       value="{{ empleado.apellido|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">DNI *</label>
+                                <input type="text" name="dni" class="form-control" 
+                                       value="{{ empleado.dni|default:'' }}" 
+                                       {% if empleado %}readonly{% endif %} required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cargo *</label>
+                                <select name="cargo" class="form-select" required>
+                                    <option value="">Seleccione cargo</option>
+                                    <option value="Limpiador" {% if empleado.cargo == 'Limpiador' %}selected{% endif %}>Limpiador</option>
+                                    <option value="Jardinero" {% if empleado.cargo == 'Jardinero' %}selected{% endif %}>Jardinero</option>
+                                    <option value="Técnico" {% if empleado.cargo == 'Técnico' %}selected{% endif %}>Técnico</option>
+                                    <option value="Supervisor" {% if empleado.cargo == 'Supervisor' %}selected{% endif %}>Supervisor</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" 
+                                       value="{{ empleado.email|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" name="telefono" class="form-control" 
+                                       value="{{ empleado.telefono|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if empleado %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="activo" class="form-check-input" 
+                               id="activo" {% if empleado.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">Empleado activo</label>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if empleado %}Guardar{% else %}Crear{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

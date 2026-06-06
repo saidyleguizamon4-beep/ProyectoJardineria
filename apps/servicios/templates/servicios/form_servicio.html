@@ -1,0 +1,57 @@
+<!-- servicios/templates/servicios/form_servicio.html -->
+{% extends 'base.html' %}
+
+{% block title %}{% if servicio %}Editar{% else %}Nuevo{% endif %} Servicio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus"></i> {% if servicio %}Editar{% else %}Nuevo{% endif %} Servicio</h2>
+    <a href="{% url 'servicios:lista_servicios' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-concierge-bell"></i> Datos del Servicio</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Servicio *</label>
+                        <input type="text" name="nombre" class="form-control" 
+                               value="{{ servicio.nombre|default:'' }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="3">{{ servicio.descripcion|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Duración Estimada (minutos)</label>
+                        <input type="number" name="duracion_estimada_minutos" class="form-control" 
+                               value="{{ servicio.duracion_estimada_minutos|default:60 }}">
+                    </div>
+                    
+                    {% if servicio %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="activo" class="form-check-input" 
+                               id="activo" {% if servicio.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">Servicio activo</label>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if servicio %}Guardar{% else %}Crear{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
