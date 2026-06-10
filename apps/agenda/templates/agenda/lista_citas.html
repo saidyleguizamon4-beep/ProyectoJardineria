@@ -1,0 +1,150 @@
+<!-- agenda/templates/agenda/lista_citas.html -->
+{% extends 'base.html' %}
+
+{% block title %}Agenda - Jardinería Bogotá{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-calendar-alt"></i> Agenda de Citas</h2>
+        <p class="text-muted mb-0">Programación de citas y visitas</p>
+    </div>
+    <a href="{% url 'agenda:crear_cita' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nueva Cita
+    </a>
+</div>
+
+<!-- Filtro por fecha -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filtrar por fecha</label>
+                <input type="date" name="fecha" class="form-control" value="{{ fecha_filtro }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <a href="{% url 'agenda:lista_citas' %}" class="btn btn-secondary w-100">
+                    <i class="fas fa-times"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-2x text-primary"></i>
+                <h3>{{ citas.count }}</h3>
+                <p class="mb-0">Total Citas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x text-warning"></i>
+                <h3>{{ citas.count }}</h3>
+                <p class="mb-0">Pendientes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-success"></i>
+                <h3>0</h3>
+                <p class="mb-0">Confirmadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-check fa-2x text-info"></i>
+                <h3>0</h3>
+                <p class="mb-0">Realizadas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Citas</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Cliente</th>
+                    <th>Empleado</th>
+                    <th>Motivo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                <tr>
+                    <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ cita.hora }}</td>
+                    <td>{{ cita.cliente.nombre }} {{ cita.cliente.apellido }}</td>
+                    <td>
+                        {% if cita.empleado %}
+                            {{ cita.empleado.nombre }}
+                        {% else %}
+                            <span class="text-muted">Sin asignar</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ cita.motivo|truncatechars:30 }}</td>
+                    <td>
+                        {% if cita.estado_cita == 'pendiente' %}
+                            <span class="badge bg-warning">Pendiente</span>
+                        {% elif cita.estado_cita == 'confirmada' %}
+                            <span class="badge bg-success">Confirmada</span>
+                        {% elif cita.estado_cita == 'cancelada' %}
+                            <span class="badge bg-danger">Cancelada</span>
+                        {% elif cita.estado_cita == 'realizada' %}
+                            <span class="badge bg-info">Realizada</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{% url 'agenda:detalle_cita' cita.id_cita %}" 
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'agenda:editar_cita' cita.id_cita %}" 
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'agenda:cambiar_estado' cita.id_cita %}" 
+                               class="btn btn-sm btn-info">
+                                <i class="fas fa-sync"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No hay citas programadas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

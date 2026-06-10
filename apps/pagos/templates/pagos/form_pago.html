@@ -1,0 +1,66 @@
+<!-- pagos/templates/pagos/form_pago.html -->
+{% extends 'base.html' %}
+
+{% block title %}Registrar Pago{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus"></i> Registrar Pago</h2>
+    <a href="{% url 'pagos:lista_pagos' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-money-bill"></i> Datos del Pago</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Factura *</label>
+                        <select name="factura" class="form-select" required>
+                            <option value="">Seleccione factura</option>
+                            {% for f in facturas %}
+                            <option value="{{ f.id_factura }}">
+                                {{ f.numero_factura }} - ${{ f.total|floatformat:2 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Método de Pago *</label>
+                        <select name="metodo_pago" class="form-select" required>
+                            <option value="">Seleccione método</option>
+                            {% for m in metodos %}
+                            <option value="{{ m.id_metodo }}">{{ m.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Monto *</label>
+                        <input type="number" name="monto" class="form-control" 
+                               step="0.01" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Referencia</label>
+                        <input type="text" name="referencia" class="form-control" 
+                               placeholder="Número de transacción">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Registrar Pago
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

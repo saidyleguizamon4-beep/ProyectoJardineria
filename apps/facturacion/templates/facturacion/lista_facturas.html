@@ -1,0 +1,100 @@
+<!-- facturacion/templates/facturacion/lista_facturas.html -->
+{% extends 'base.html' %}
+
+{% block title %}Facturación - Jardinería Bogotá{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-file-invoice-dollar"></i> Facturación</h2>
+        <p class="text-muted mb-0">Gestión de facturas</p>
+    </div>
+</div>
+
+<!-- Filtro -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Filtrar por estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                    <option value="pagada" {% if estado_filtro == 'pagada' %}selected{% endif %}>Pagada</option>
+                    <option value="vencida" {% if estado_filtro == 'vencida' %}selected{% endif %}>Vencida</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Facturas</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Propiedad</th>
+                    <th>Subtotal</th>
+                    <th>IVA</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for factura in facturas %}
+                <tr>
+                    <td><strong>{{ factura.numero_factura }}</strong></td>
+                    <td>{{ factura.fecha_emision|date:"d/m/Y" }}</td>
+                    <td>{{ factura.trabajo.propiedad.cliente.nombre }}</td>
+                    <td>{{ factura.trabajo.propiedad.direccion|truncatechars:20 }}</td>
+                    <td>${{ factura.subtotal|floatformat:2 }}</td>
+                    <td>{{ factura.iva }}%</td>
+                    <td><strong>${{ factura.total|floatformat:2 }}</strong></td>
+                    <td>
+                        {% if factura.estado_pago == 'pendiente' %}
+                            <span class="badge bg-warning">Pendiente</span>
+                        {% elif factura.estado_pago == 'pagada' %}
+                            <span class="badge bg-success">Pagada</span>
+                        {% elif factura.estado_pago == 'vencida' %}
+                            <span class="badge bg-danger">Vencida</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{% url 'facturacion:detalle_factura' factura.id_factura %}" 
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if factura.estado_pago == 'pendiente' %}
+                            <a href="{% url 'facturacion:marcar_pagada' factura.id_factura %}" 
+                               class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">No hay facturas</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

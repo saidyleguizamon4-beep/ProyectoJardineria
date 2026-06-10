@@ -9,5 +9,4 @@ urlpatterns = [
     path('<int:pk>/', views.detalle_empleado, name='detalle_empleado'),
     path('<int:pk>/editar/', views.editar_empleado, name='editar_empleado'),
     path('<int:pk>/eliminar/', views.eliminar_empleado, name='eliminar_empleado'),
-    path('validar-dni/', views.validar_dni, name='validar_dni'),
 ]

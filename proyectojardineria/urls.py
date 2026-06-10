@@ -24,11 +24,10 @@ urlpatterns = [
     path('usuarios/', include('apps.usuarios.urls')),
     path('clientes/', include('apps.clientes.urls')),
     path('empleados/', include('apps.empleados.urls')),
-    path('servicios/', include('servicios.urls')),
-
-
+    path('servicios/', include('apps.servicios.urls')),
+    path('agenda/', include('apps.agenda.urls')),
+    path('trabajos/', include('apps.trabajos.urls')),
+    path('facturacion/', include('apps.facturacion.urls')),
+    path('pagos/', include('apps.pagos.urls')),
 ]
-# proyecto/urls.py
-from django.contrib import admin
-from django.urls import path, include
 

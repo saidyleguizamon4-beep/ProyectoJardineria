@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-from usuarios.views import verificar_sesion
 from .models import Empleado
+from apps.usuarios.views import verificar_sesion
 
 
 @verificar_sesion

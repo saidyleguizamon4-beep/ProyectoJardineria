@@ -1,0 +1,66 @@
+<!-- agenda/templates/agenda/form_cita.html -->
+{% extends 'base.html' %}
+
+{% block title %}{% if cita %}Editar{% else %}Nueva{% endif %} Cita{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-calendar-plus"></i> {% if cita %}Editar{% else %}Nueva{% endif %} Cita</h2>
+    <a href="{% url 'agenda:lista_citas' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar"></i> Datos de la Cita</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Cliente *</label>
+                                <select name="cliente" class="form-select" required>
+                                    <option value="">Seleccione cliente</option>
+                                    {% for c in clientes %}
+                                    <option value="{{ c.id_cliente }}" {% if cita.cliente_id == c.id_cliente %}selected{% endif %}>
+                                        {{ c.nombre }} {{ c.apellido }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Empleado</label>
+                                <select name="empleado" class="form-select">
+                                    <option value="">Sin asignar</option>
+                                    {% for e in empleados %}
+                                    <option value="{{ e.id_empleado }}" {% if cita.empleado_id == e.id_empleado %}selected{% endif %}>
+                                        {{ e.nombre }} {{ e.apellido }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Fecha *</label>
+                                <input type="date" name="fecha" class="form-control" 
+                                       value="{{ cita.fecha|default:'' }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Hora *</label>
+                                <input type="time" name="hora" class="form-control" 
+                                       value="{{ cita.hora|default:'' }}" required>
+                            </div>
