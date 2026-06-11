@@ -14,7 +14,7 @@ class Empleado(models.Model):
     )
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    dni = models.CharField(max_length=20, unique=True)
+    documento = models.CharField(max_length=20, unique=True)
     email = models.EmailField()
     telefono = models.CharField(max_length=20)
     cargo = models.CharField(max_length=100)

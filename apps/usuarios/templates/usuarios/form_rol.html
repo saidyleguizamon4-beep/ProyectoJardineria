@@ -1,21 +1,126 @@
 <!-- usuarios/templates/usuarios/form_rol.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% if rol %}Editar{% else %}Crear{% endif %} Rol - Jardinería Bogotá{% endblock %}
+{% block page_title %}{% if rol %}Editar{% else %}Nuevo{% endif %} Rol{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2><i class="fas fa-user-tag"></i> {% if rol %}Editar{% else %}Nuevo{% endif %} Rol</h2>
-        <p class="text-muted mb-0">Complete los datos del rol</p>
-    </div>
-    <a href="{% url 'usuarios:lista_roles' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
-
 <div class="row">
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-8">
+        <!-- Card Principal -->
+        <div class="custom-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-tag"></i> Datos del Rol</h
+                <i class="fas fa-user-tag"></i> 
+                {% if rol %}Editar{% else %}Crear{% endif %} Rol de Usuario
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i> Nombre del Rol *
+                        </label>
+                        <input type="text" 
+                               name="nombre_rol" 
+                               class="form-control" 
+                               value="{{ rol.nombre_rol|default:'' }}"
+                               placeholder="Ej: admin, supervisor, empleado, cliente"
+                               required>
+                        <div class="form-text">
+                            El nombre debe ser único y sin espacios
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-align-left"></i> Descripción
+                        </label>
+                        <textarea name="descripcion" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Describe las funciones de este rol">{{ rol.descripcion|default:'' }}</textarea>
+                    </div>
+                    
+                    {% if rol %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" 
+                               name="activo" 
+                               class="form-check-input" 
+                               id="activo" 
+                               {% if rol.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            <i class="fas fa-check-circle"></i> Rol activo
+                        </label>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save"></i> 
+                            {% if rol %}Actualizar{% else %}Crear{% endif %} Rol
+                        </button>
+                        <a href="{% url 'usuarios:lista_roles' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-md-4">
+        <!-- Información de Roles -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Roles del Sistema
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-crown text-warning me-2"></i>
+                        <strong>admin</strong>
+                        <p class="mb-0 text-muted small">Administrador del sistema</p>
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-user-tie text-primary me-2"></i>
+                        <strong>supervisor</strong>
+                        <p class="mb-0 text-muted small">Supervisa empleados</p>
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-hard-hat text-success me-2"></i>
+                        <strong>empleado</strong>
+                        <p class="mb-0 text-muted small">Trabajador de la empresa</p>
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-user-friends text-info me-2"></i>
+                        <strong>cliente</strong>
+                        <p class="mb-0 text-muted small">Cliente del servicio</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i> Estadísticas
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Roles</span>
+                    <strong>4</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Roles Activos</span>
+                    <strong class="text-success">4</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Usuarios</span>
+                    <strong>0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

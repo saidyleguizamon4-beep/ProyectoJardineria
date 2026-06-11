@@ -1,40 +1,47 @@
-<!-- usuarios/templates/usuarios/confirmar_eliminar.html -->
+<!-- usuarios/templates/usuarios/confirmar_eliminar_rol.html -->
 {% extends 'base.html' %}
 
-{% block title %}Confirmar Eliminación - Jardinería Bogotá{% endblock %}
+{% block page_title %}Confirmar Eliminación{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card border-danger">
+        <div class="custom-card border-danger">
             <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
             </div>
             <div class="card-body text-center">
                 <i class="fas fa-user-times fa-4x text-danger mb-3"></i>
                 
-                <h4>¿Está seguro de eliminar el usuario?</h4>
+                <h4>¿Está seguro de eliminar el rol?</h4>
                 
-                <div class="card mt-3">
+                <div class="custom-card mt-3">
                     <div class="card-body">
-                        <strong>{{ usuario.username }}</strong>
-                        <br>
-                        <span class="text-muted">{{ usuario.rol.nombre_rol }}</span>
+                        <i class="fas fa-tag text-danger me-2"></i>
+                        <strong>{{ rol.nombre_rol }}</strong>
+                        <p class="text-muted mb-0">{{ rol.descripcion|default:'' }}</p>
                     </div>
                 </div>
                 
+                {% if rol.usuarios.count > 0 %}
                 <div class="alert alert-warning mt-3">
                     <i class="fas fa-exclamation-circle"></i>
-                    Esta acción no se puede deshacer
+                    <strong>Advertencia:</strong> Este rol tiene {{ rol.usuarios.count }} usuario(s) asignado(s).
+                </div>
+                {% endif %}
+                
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Esta acción no se puede deshacer.
                 </div>
                 
-                <form method="post">
+                <form method="post" class="mt-3">
                     {% csrf_token %}
                     <div class="d-flex gap-2 justify-content-center">
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
-                        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
+                        <a href="{% url 'usuarios:lista_roles' %}" class="btn btn-secondary">
                             Cancelar
                         </a>
                     </div>
