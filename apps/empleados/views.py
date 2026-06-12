@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
-from .models import Empleado
 from apps.usuarios.views import verificar_sesion
+from .models import Empleado
 
 
 @verificar_sesion
@@ -23,11 +23,12 @@ def crear_empleado(request):
     if request.method == 'POST':
         nombre = request.POST.get('nombre', '').strip()
         apellido = request.POST.get('apellido', '').strip()
-        dni = request.POST.get('dni', '').strip()
+        documento = request.POST.get('documento', '').strip()  # ← Cambiado de dni
         email = request.POST.get('email', '').strip()
         telefono = request.POST.get('telefono', '').strip()
         cargo = request.POST.get('cargo', '').strip()
         fecha_contratacion = request.POST.get('fecha_contratacion', '').strip()
+        observaciones = request.POST.get('observaciones', '').strip()
         
         # Validaciones
         errores = []
@@ -36,10 +37,14 @@ def crear_empleado(request):
             errores.append('El nombre es requerido')
         if not apellido:
             errores.append('El apellido es requerido')
-        if not dni:
-            errores.append('El DNI es requerido')
-        if Empleado.objects.filter(dni=dni).exists():
-            errores.append('El DNI ya está registrado')
+        if not documento:
+            errores.append('El documento es requerido')
+        if Empleado.objects.filter(documento=documento).exists():  # ← Cambiado
+            errores.append('El documento ya está registrado')
+        if not email:
+            errores.append('El email es requerido')
+        if not cargo:
+            errores.append('El cargo es requerido')
         
         if errores:
             for error in errores:
@@ -50,11 +55,12 @@ def crear_empleado(request):
         Empleado.objects.create(
             nombre=nombre,
             apellido=apellido,
-            dni=dni,
+            documento=documento,  # ← Cambiado
             email=email,
             telefono=telefono,
             cargo=cargo,
-            fecha_contratacion=fecha_contratacion if fecha_contratacion else None
+            fecha_contratacion=fecha_contratacion if fecha_contratacion else None,
+            observaciones=observaciones
         )
         
         messages.success(request, 'Empleado creado correctamente')
@@ -83,6 +89,8 @@ def editar_empleado(request, pk):
         email = request.POST.get('email', '').strip()
         telefono = request.POST.get('telefono', '').strip()
         cargo = request.POST.get('cargo', '').strip()
+        fecha_contratacion = request.POST.get('fecha_contratacion', '').strip()
+        observaciones = request.POST.get('observaciones', '').strip()
         activo = request.POST.get('activo', False)
         
         if not nombre:
@@ -97,6 +105,8 @@ def editar_empleado(request, pk):
         empleado.email = email
         empleado.telefono = telefono
         empleado.cargo = cargo
+        empleado.fecha_contratacion = fecha_contratacion
+        empleado.observaciones = observaciones
         empleado.activo = bool(activo)
         empleado.save()
         
@@ -122,3 +132,14 @@ def eliminar_empleado(request, pk):
         'empleado': empleado
     })
 
+
+@require_http_methods(["POST"])
+def validar_documento(request):  # ← Cambiado de validar_dni
+    """API para validar documento"""
+    documento = request.POST.get('documento', '').strip()
+    existe = Empleado.objects.filter(documento=documento).exists()  # ← Cambiado
+    
+    return JsonResponse({
+        'existe': existe,
+        'mensaje': 'El documento ya está registrado' if existe else 'Documento disponible'
+    })

@@ -1,3 +1,4 @@
+# empleados/urls.py
 from django.urls import path
 from . import views
 
@@ -9,4 +10,5 @@ urlpatterns = [
     path('<int:pk>/', views.detalle_empleado, name='detalle_empleado'),
     path('<int:pk>/editar/', views.editar_empleado, name='editar_empleado'),
     path('<int:pk>/eliminar/', views.eliminar_empleado, name='eliminar_empleado'),
+    path('validar-documento/', views.validar_documento, name='validar_documento'),
 ]

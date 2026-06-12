@@ -1,96 +1,240 @@
+<!-- empleados/templates/empleados/form_empleado.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% if empleado %}Editar{% else %}Nuevo{% endif %} Empleado{% endblock %}
+{% block page_title %}{% if empleado %}Editar{% else %}Nuevo{% endif %} Empleado{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2><i class="fas fa-user-plus"></i> {% if empleado %}Editar{% else %}Nuevo{% endif %} Empleado</h2>
-    </div>
-    <a href="{% url 'empleados:lista_empleados' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
-
 <div class="row">
+    <!-- Formulario Principal -->
     <div class="col-md-8">
-        <div class="card">
+        <div class="custom-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-user"></i> Datos del Empleado</h5>
+                <i class="fas fa-user-plus"></i> 
+                {% if empleado %}Editar{% else %}Datos del{% endif %} Empleado
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- Nombres -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Nombre *</label>
-                                <input type="text" name="nombre" class="form-control" 
-                                       value="{{ empleado.nombre|default:'' }}" required>
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Nombre *
+                                </label>
+                                <input type="text" 
+                                       name="nombre" 
+                                       class="form-control" 
+                                       value="{{ empleado.nombre|default:'' }}"
+                                       placeholder="Ingrese el nombre"
+                                       required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Apellido *</label>
-                                <input type="text" name="apellido" class="form-control" 
-                                       value="{{ empleado.apellido|default:'' }}" required>
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Apellido *
+                                </label>
+                                <input type="text" 
+                                       name="apellido" 
+                                       class="form-control" 
+                                       value="{{ empleado.apellido|default:'' }}"
+                                       placeholder="Ingrese el apellido"
+                                       required>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Documento -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-id-card"></i> Documento de Identidad *
+                        </label>
+                        <input type="text" 
+                               name="documento" 
+                               class="form-control" 
+                               value="{{ empleado.documento|default:'' }}"
+                               placeholder="Ej: 12345678"
+                               {% if empleado %}readonly{% endif %}
+                               required>
+                        <div class="form-text">Número de identificación único</div>
+                    </div>
+                    
+                    <!-- Contacto -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Documento *</label>
-                                <input type="text" name="dni" class="form-control" 
-                                       value="{{ empleado.dni|default:'' }}" 
-                                       {% if empleado %}readonly{% endif %} required>
+                                <label class="form-label">
+                                    <i class="fas fa-envelope"></i> Email *
+                                </label>
+                                <input type="email" 
+                                       name="email" 
+                                       class="form-control" 
+                                       value="{{ empleado.email|default:'' }}"
+                                       placeholder="correo@ejemplo.com"
+                                       required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Cargo *</label>
+                                <label class="form-label">
+                                    <i class="fas fa-phone"></i> Teléfono
+                                </label>
+                                <input type="text" 
+                                       name="telefono" 
+                                       class="form-control" 
+                                       value="{{ empleado.telefono|default:'' }}"
+                                       placeholder="Ej: 3001234567">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cargo y Fecha -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-briefcase"></i> Cargo *
+                                </label>
                                 <select name="cargo" class="form-select" required>
                                     <option value="">Seleccione cargo</option>
-                                    <option value="Limpiador" {% if empleado.cargo == 'Limpiador' %}selected{% endif %}>Limpiador</option>
-                                    <option value="Jardinero" {% if empleado.cargo == 'Jardinero' %}selected{% endif %}>Jardinero</option>
-                                    <option value="Técnico" {% if empleado.cargo == 'Técnico' %}selected{% endif %}>Técnico</option>
-                                    <option value="Supervisor" {% if empleado.cargo == 'Supervisor' %}selected{% endif %}>Supervisor</option>
+                                    <option value="Limpiador" {% if empleado.cargo == 'Limpiador' %}selected{% endif %}>
+                                        🧹 Limpiador
+                                    </option>
+                                    <option value="Jardinero" {% if empleado.cargo == 'Jardinero' %}selected{% endif %}>
+                                        🌿 Jardinero
+                                    </option>
+                                    <option value="Técnico" {% if empleado.cargo == 'Técnico' %}selected{% endif %}>
+                                        🔧 Técnico
+                                    </option>
+                                    <option value="Supervisor" {% if empleado.cargo == 'Supervisor' %}selected{% endif %}>
+                                        👔 Supervisor
+                                    </option>
+                                    <option value="Administrativo" {% if empleado.cargo == 'Administrativo' %}selected{% endif %}>
+                                        📋 Administrativo
+                                    </option>
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" 
-                                       value="{{ empleado.email|default:'' }}">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Teléfono</label>
-                                <input type="text" name="telefono" class="form-control" 
-                                       value="{{ empleado.telefono|default:'' }}">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar"></i> Fecha de Contratación
+                                </label>
+                                <input type="date" 
+                                       name="fecha_contratacion" 
+                                       class="form-control" 
+                                       value="{{ empleado.fecha_contratacion|default:'' }}"
+                                       required>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-comment"></i> Observaciones
+                        </label>
+                        <textarea name="observaciones" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Notas adicionales sobre el empleado...">{{ empleado.observaciones|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Estado (solo para edición) -->
                     {% if empleado %}
                     <div class="mb-3 form-check">
-                        <input type="checkbox" name="activo" class="form-check-input" 
-                               id="activo" {% if empleado.activo %}checked{% endif %}>
-                        <label class="form-check-label" for="activo">Empleado activo</label>
+                        <input type="checkbox" 
+                               name="activo" 
+                               class="form-check-input" 
+                               id="activo" 
+                               {% if empleado.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            <i class="fas fa-check-circle"></i> Empleado activo
+                        </label>
                     </div>
                     {% endif %}
                     
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> {% if empleado %}Guardar{% else %}Crear{% endif %}
-                    </button>
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save"></i> 
+                            {% if empleado %}Actualizar{% else %}Crear{% endif %} Empleado
+                        </button>
+                        <a href="{% url 'empleados:lista_empleados' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
                 </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-md-4">
+        <!-- Información -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Información
+            </div>
+            <div class="card-body">
+                <p><i class="fas fa-calendar-plus text-success"></i> 
+                    <strong>Fecha de Registro:</strong><br>
+                    <span class="text-muted">{{ empleado.fecha_alta|date:"d/m/Y H:i"|default:"..." }}</span>
+                </p>
+                <hr>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Los campos marcados con * son obligatorios
+                </p>
+            </div>
+        </div>
+        
+        <!-- Cargos Disponibles -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-briefcase"></i> Cargos
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-broom text-success me-2"></i> Limpiador
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-leaf text-success me-2"></i> Jardinero
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-tools text-primary me-2"></i> Técnico
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-user-tie text-warning me-2"></i> Supervisor
+                    </div>
+                    <div class="list-group-item px-0">
+                        <i class="fas fa-file-alt text-info me-2"></i> Administrativo
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estado -->
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-toggle-on"></i> Estado
+            </div>
+            <div class="card-body text-center">
+                {% if empleado %}
+                    {% if empleado.activo %}
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                        <p class="mt-2 text-success"><strong>Activo</strong></p>
+                    {% else %}
+                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                        <p class="mt-2 text-danger"><strong>Inactivo</strong></p>
+                    {% endif %}
+                {% else %}
+                    <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    <p class="mt-2"><strong>Nuevo Empleado</strong></p>
+                {% endif %}
             </div>
         </div>
     </div>

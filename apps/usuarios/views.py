@@ -52,7 +52,7 @@ def login_view(request):
         usuario.save(update_fields=['ultimo_login'])
         
         messages.success(request, f'Bienvenido {usuario.username}')
-        return redirect('usuarios:lista_usuarios')
+        return redirect('inicio')
     
     return render(request, 'usuarios/login.html')
 

@@ -1,0 +1,78 @@
+<!-- empleados/templates/empleados/confirmar_eliminar.html -->
+{% extends 'base.html' %}
+
+{% block page_title %}Eliminar Empleado{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="custom-card">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-user-times"></i> Eliminar Empleado
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="avatar mx-auto mb-3" style="width: 100px; height: 100px; font-size: 36px; background: #dc3545;">
+                        {{ empleado.nombre|slice:1 }}{{ empleado.apellido|slice:1 }}
+                    </div>
+                    <h3>{{ empleado.nombre }} {{ empleado.apellido }}</h3>
+                </div>
+                
+                <hr>
+                
+                <!-- Información -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><i class="fas fa-id-card text-primary"></i> 
+                            <strong>Documento:</strong> {{ empleado.documento }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><i class="fas fa-envelope text-primary"></i> 
+                            <strong>Email:</strong> {{ empleado.email }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><i class="fas fa-phone text-primary"></i> 
+                            <strong>Teléfono:</strong> {{ empleado.telefono|default:"-" }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><i class="fas fa-briefcase text-primary"></i> 
+                            <strong>Cargo:</strong> {{ empleado.cargo }}
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Alerta -->
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-triangle"></i> ¿Confirmar eliminación?</h5>
+                    <p class="mb-0">Está a punto de eliminar permanentemente este empleado del sistema. Esta acción no se puede deshacer.</p>
+                </div>
+                
+                <!-- Formulario -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="confirmar" required>
+                        <label class="form-check-label" for="confirmar">
+                            Confirmo que deseo eliminar este empleado
+                        </label>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Eliminar Empleado
+                        </button>
+                        <a href="{% url 'empleados:lista_empleados' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
