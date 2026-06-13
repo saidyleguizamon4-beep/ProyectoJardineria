@@ -1,49 +1,205 @@
 <!-- trabajos/templates/trabajos/form_trabajo.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% if trabajo %}Editar{% else %}Nuevo{% endif %} Trabajo{% endblock %}
+{% block page_title %}{% if trabajo %}Editar{% else %}Nuevo{% endif %} Trabajo{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-plus"></i> {% if trabajo %}Editar{% else %}Nuevo{% endif %} Trabajo</h2>
-    <a href="{% url 'trabajos:lista_trabajos' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
-
 <div class="row">
+    <!-- Formulario Principal -->
     <div class="col-md-8">
-        <div class="card">
+        <div class="custom-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-briefcase"></i> Datos del Trabajo</h5>
+                <i class="fas fa-briefcase"></i> 
+                {% if trabajo %}Editar{% else %}Crear{% endif %} Trabajo
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- Propiedad -->
                     <div class="mb-3">
-                        <label class="form-label">Propiedad *</label>
+                        <label class="form-label">
+                            <i class="fas fa-home"></i> Propiedad *
+                        </label>
                         <select name="propiedad" class="form-select" required>
                             <option value="">Seleccione propiedad</option>
                             {% for p in propiedades %}
                             <option value="{{ p.id_propiedad }}" {% if trabajo.propiedad_id == p.id_propiedad %}selected{% endif %}>
-                                {{ p.direccion }} - {{ p.cliente.nombre }}
+                                {{ p.direccion }} - {{ p.cliente.nombre }} {{ p.cliente.apellido }}
                             </option>
                             {% endfor %}
                         </select>
                     </div>
                     
+                    <!-- Fechas -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Fecha Inicio *</label>
-                                <input type="date" name="fecha_inicio" class="form-control" 
-                                       value="{{ trabajo.fecha_inicio|default:'' }}" required>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar"></i> Fecha de Inicio *
+                                </label>
+                                <input type="date" 
+                                       name="fecha_inicio" 
+                                       class="form-control" 
+                                       value="{{ trabajo.fecha_inicio|default:'' }}"
+                                       required>
                             </div>
                         </div>
-                        {% if trabajo %}
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Fecha Fin</label>
-                                <input type="date" name="fecha_fin" class="form-control" 
-                                       value="{{ trabajo.fecha
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-check"></i> Fecha de Fin
+                                </label>
+                                <input type="date" 
+                                       name="fecha_fin" 
+                                       class="form-control" 
+                                       value="{{ trabajo.fecha_fin|default:'' }}">
+                                <div class="form-text">Dejar vacío si está en proceso</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Número de Trabajadores -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-users"></i> Número de Trabajadores *
+                        </label>
+                        <input type="number" 
+                               name="num_trabajadores" 
+                               class="form-control" 
+                               value="{{ trabajo.num_trabajadores|default:'1' }}"
+                               min="1" max="20"
+                               required>
+                    </div>
+                    
+                    <!-- Estado (solo para edición) -->
+                    {% if trabajo %}
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-toggle-on"></i> Estado del Trabajo
+                        </label>
+                        <select name="estado" class="form-select">
+                            <option value="pendiente" {% if trabajo.estado == 'pendiente' %}selected{% endif %}>
+                                ⏳ Pendiente
+                            </option>
+                            <option value="asignado" {% if trabajo.estado == 'asignado' %}selected{% endif %}>
+                                👥 Asignado
+                            </option>
+                            <option value="en_progreso" {% if trabajo.estado == 'en_progreso' %}selected{% endif %}>
+                                🔄 En Progreso
+                            </option>
+                            <option value="completado" {% if trabajo.estado == 'completado' %}selected{% endif %}>
+                                ✅ Completado
+                            </option>
+                            <option value="cancelado" {% if trabajo.estado == 'cancelado' %}selected{% endif %}>
+                                ❌ Cancelado
+                            </option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-comment"></i> Observaciones
+                        </label>
+                        <textarea name="observaciones" 
+                                  class="form-control" 
+                                  rows="4"
+                                  placeholder="Notas adicionales sobre el trabajo...">{{ trabajo.observaciones|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save"></i> 
+                            {% if trabajo %}Actualizar{% else %}Crear{% endif %} Trabajo
+                        </button>
+                        <a href="{% url 'trabajos:lista_trabajos' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-md-4">
+        <!-- Información del Trabajo -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Información
+            </div>
+            <div class="card-body">
+                {% if trabajo %}
+                <p><strong>Estado:</strong><br>
+                    {% if trabajo.estado == 'pendiente' %}
+                        <span class="badge bg-warning">Pendiente</span>
+                    {% elif trabajo.estado == 'asignado' %}
+                        <span class="badge bg-info">Asignado</span>
+                    {% elif trabajo.estado == 'en_progreso' %}
+                        <span class="badge bg-primary">En Progreso</span>
+                    {% elif trabajo.estado == 'completado' %}
+                        <span class="badge bg-success">Completado</span>
+                    {% elif trabajo.estado == 'cancelado' %}
+                        <span class="badge bg-danger">Cancelado</span>
+                    {% endif %}
+                </p>
+                <hr>
+                {% endif %}
+                
+                <p><strong>Fecha de Registro:</strong><br>
+                    <span class="text-muted">{{ trabajo.fecha_alta|date:"d/m/Y H:i"|default:"..." }}</span>
+                </p>
+                <hr>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Los campos marcados con * son obligatorios
+                </p>
+            </div>
+        </div>
+        
+        <!-- Estados -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-list"></i> Estados de Trabajo
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-warning me-1"></span> Pendiente
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-info me-1"></span> Asignado
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-primary me-1"></span> En Progreso
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-success me-1"></span> Completado
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-danger me-1"></span> Cancelado
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips -->
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-lightbulb"></i> Consejos
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0 text-muted small">
+                    <li><i class="fas fa-check text-success"></i> Asigne trabajadores disponibles</li>
+                    <li><i class="fas fa-check text-success"></i> Establezca fechas realistas</li>
+                    <li><i class="fas fa-check text-success"></i> Agregue observaciones claras</li>
+                    <li><i class="fas fa-check text-success"></i> Actualice el estado frecuentemente</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

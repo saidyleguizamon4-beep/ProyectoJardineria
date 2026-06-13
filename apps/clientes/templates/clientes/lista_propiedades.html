@@ -1,0 +1,160 @@
+<!-- clientes/templates/clientes/lista_propiedades.html -->
+{% extends 'base.html' %}
+
+{% block page_title %}Propiedades{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%); color: white;">
+            <div class="icon" style="background: rgba(255,255,255,0.2);">
+                <i class="fas fa-building"></i>
+            </div>
+            <h3 style="color: white;">{{ propiedades.count }}</h3>
+            <p style="color: rgba(255,255,255,0.9);">Total</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #388e3c 0%, #66bb6a 100%); color: white;">
+            <div class="icon" style="background: rgba(255,255,255,0.2);">
+                <i class="fas fa-ruler-combined"></i>
+            </div>
+            <h3 style="color: white;">0 m²</h3>
+            <p style="color: rgba(255,255,255,0.9);">Total m²</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f57c00 0%, #ffa726 100%); color: white;">
+            <div class="icon" style="background: rgba(255,255,255,0.2);">
+                <i class="fas fa-tree"></i>
+            </div>
+            <h3 style="color: white;">0</h3>
+            <p style="color: rgba(255,255,255,0.9);">Con Jardín</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #7b1fa2 0%, #ab47bc 100%); color: white;">
+            <div class="icon" style="background: rgba(255,255,255,0.2);">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 style="color: white;">0</h3>
+            <p style="color: rgba(255,255,255,0.9);">Activas</p>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4><i class="fas fa-home"></i> Gestión de Propiedades</h4>
+        <p class="text-muted mb-0">Propiedades de los clientes</p>
+    </div>
+    <a href="{% url 'clientes:crear_propiedad' %}" class="btn btn-primary-custom">
+        <i class="fas fa-plus"></i> Nueva Propiedad
+    </a>
+</div>
+
+<!-- Tabla -->
+<div class="custom-card">
+    <div class="card-header">
+        <i class="fas fa-list"></i> Lista de Propiedades
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Dirección</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Tamaño</th>
+                        <th>Jardín</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for propiedad in propiedades %}
+                    <tr>
+                        <td>#{{ propiedad.id_propiedad }}</td>
+                        <td><strong>{{ propiedad.direccion }}</strong></td>
+                        <td>
+                            <a href="{% url 'clientes:detalle_cliente' propiedad.cliente.id_cliente %}">
+                                {{ propiedad.cliente.nombre }} {{ propiedad.cliente.apellido }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if propiedad.tipo == 'casa' %}
+                                <span class="badge bg-success">🏠 Casa</span>
+                            {% elif propiedad.tipo == 'apartamento' %}
+                                <span class="badge bg-info">🏢 Apart.</span>
+                            {% elif propiedad.tipo == 'oficina' %}
+                                <span class="badge bg-primary">🏢 Oficina</span>
+                            {% elif propiedad.tipo == 'bodega' %}
+                                <span class="badge bg-warning">🏭 Bodega</span>
+                            {% elif propiedad.tipo == 'terreno' %}
+                                <span class="badge bg-secondary">🗺️ Terreno</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ propiedad.tipo }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if propiedad.tamano %}
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-ruler-combined"></i> {{ propiedad.tamano }} m²
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if propiedad.tiene_jardin %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-tree"></i> Sí
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-times"></i> No
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if propiedad.activo %}
+                                <span class="badge bg-success">Activa</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'clientes:detalle_propiedad' propiedad.id_propiedad %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'clientes:editar_propiedad' propiedad.id_propiedad %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'clientes:eliminar_propiedad' propiedad.id_propiedad %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="fas fa-home fa-2x text-muted"></i>
+                            <p class="mt-2">No hay propiedades</p>
+                            <a href="{% url 'clientes:crear_propiedad' %}" class="btn btn-primary-custom">
+                                <i class="fas fa-plus"></i> Crear
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

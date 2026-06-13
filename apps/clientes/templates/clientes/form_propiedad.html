@@ -1,0 +1,216 @@
+<!-- clientes/templates/clientes/form_propiedad.html -->
+{% extends 'base.html' %}
+
+{% block page_title %}{% if propiedad %}Editar{% else %}Nueva{% endif %} Propiedad{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Formulario Principal -->
+    <div class="col-md-8">
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-home"></i> 
+                {% if propiedad %}Editar{% else %}Datos de la{% endif %} Propiedad
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Cliente -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> Cliente *
+                        </label>
+                        <select name="cliente" class="form-select" required>
+                            <option value="">Seleccione cliente</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.id_cliente }}" {% if propiedad.cliente_id == c.id_cliente %}selected{% endif %}>
+                                {{ c.nombre }} {{ c.apellido }} - {{ c.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Dirección *
+                        </label>
+                        <input type="text" 
+                               name="direccion" 
+                               class="form-control" 
+                               value="{{ propiedad.direccion|default:'' }}"
+                               placeholder="Calle 123 #45-67, Bogotá"
+                               required>
+                    </div>
+                    
+                    <!-- Tipo -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-building"></i> Tipo de Propiedad *
+                        </label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="">Seleccione tipo</option>
+                            <option value="casa" {% if propiedad.tipo == 'casa' %}selected{% endif %}>
+                                🏠 Casa
+                            </option>
+                            <option value="apartamento" {% if propiedad.tipo == 'apartamento' %}selected{% endif %}>
+                                🏢 Apartamento
+                            </option>
+                            <option value="oficina" {% if propiedad.tipo == 'oficina' %}selected{% endif %}>
+                                🏢 Oficina
+                            </option>
+                            <option value="bodega" {% if propiedad.tipo == 'bodega' %}selected{% endif %}>
+                                🏭 Bodega
+                            </option>
+                            <option value="terreno" {% if propiedad.tipo == 'terreno' %}selected{% endif %}>
+                                🗺️ Terreno
+                            </option>
+                            <option value="otro" {% if propiedad.tipo == 'otro' %}selected{% endif %}>
+                                📝 Otro
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <!-- Tamaño (NUEVO CAMPO) -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-ruler-combined"></i> Tamaño (m²) *
+                        </label>
+                        <input type="number" 
+                               name="tamano" 
+                               class="form-control" 
+                               value="{{ propiedad.tamano|default:'' }}"
+                               placeholder="Ej: 150.00"
+                               step="0.01"
+                               min="0"
+                               required>
+                        <div class="form-text">Tamaño en metros cuadrados</div>
+                    </div>
+                    
+                    <!-- Tiene Jardín -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" 
+                               name="tiene_jardin" 
+                               class="form-check-input" 
+                               id="tiene_jardin" 
+                               {% if propiedad.tiene_jardin %}checked{% endif %}>
+                        <label class="form-check-label" for="tiene_jardin">
+                            <i class="fas fa-tree"></i> ¿Tiene jardín?
+                        </label>
+                    </div>
+                    
+                    <!-- Observaciones -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-comment"></i> Observaciones
+                        </label>
+                        <textarea name="observaciones" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Notas adicionales...">{{ propiedad.observaciones|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Estado (solo edición) -->
+                    {% if propiedad %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" 
+                               name="activo" 
+                               class="form-check-input" 
+                               id="activo" 
+                               {% if propiedad.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            <i class="fas fa-check-circle"></i> Propiedad activa
+                        </label>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save"></i> 
+                            {% if propiedad %}Actualizar{% else %}Crear{% endif %} Propiedad
+                        </button>
+                        <a href="{% url 'clientes:lista_propiedades' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Información
+            </div>
+            <div class="card-body">
+                {% if propiedad %}
+                <p><strong>Estado:</strong><br>
+                    {% if propiedad.activo %}
+                        <span class="badge bg-success">Activa</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactiva</span>
+                    {% endif %}
+                </p>
+                <hr>
+                {% endif %}
+                <p><strong>Fecha de Registro:</strong><br>
+                    <span class="text-muted">{{ propiedad.fecha_alta|date:"d/m/Y H:i"|default:"..." }}</span>
+                </p>
+                <hr>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Los campos con * son obligatorios
+                </p>
+            </div>
+        </div>
+        
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-ruler-combined"></i> Tamaño
+            </div>
+            <div class="card-body text-center">
+                {% if propiedad.tamano %}
+                    <h3>{{ propiedad.tamano }} m²</h3>
+                    <p class="text-muted mb-0">metros cuadrados</p>
+                {% else %}
+                    <i class="fas fa-ruler-combined fa-2x text-muted"></i>
+                    <p class="mt-2 text-muted">Sin tamaño</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-tree"></i> Jardín
+            </div>
+            <div class="card-body text-center">
+                {% if propiedad.tiene_jardin %}
+                    <i class="fas fa-tree fa-2x text-success"></i>
+                    <p class="mt-2 text-success">Tiene jardín</p>
+                {% else %}
+                    <i class="fas fa-tree fa-2x text-muted"></i>
+                    <p class="mt-2 text-muted">Sin jardín</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-lightbulb"></i> Consejos
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0 text-muted small">
+                    <li><i class="fas fa-check text-success"></i> Ingrese la dirección completa</li>
+                    <li><i class="fas fa-check text-success"></i> Seleccione el tipo correcto</li>
+                    <li><i class="fas fa-check text-success"></i> Ingrese el tamaño en m²</li>
+                    <li><i class="fas fa-check text-success"></i> Marque si tiene jardín</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

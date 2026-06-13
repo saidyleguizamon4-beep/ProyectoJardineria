@@ -1,0 +1,58 @@
+<!-- clientes/templates/clientes/confirmar_eliminar_propiedad.html -->
+{% extends 'base.html' %}
+
+{% block page_title %}Eliminar Propiedad{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="custom-card">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+            </div>
+            <div class="card-body text-center">
+                <i class="fas fa-home fa-4x text-danger mb-3"></i>
+                
+                <h4>¿Está seguro de eliminar la propiedad?</h4>
+                
+                <!-- Datos -->
+                <div class="custom-card mt-3">
+                    <div class="card-body">
+                        <h5>{{ propiedad.direccion }}</h5>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-user"></i> {{ propiedad.cliente.nombre }} {{ propiedad.cliente.apellido }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-building"></i> {{ propiedad.tipo }}
+                        </p>
+                        {% if propiedad.tamano %}
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-ruler-combined"></i> {{ propiedad.tamano }} m²
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Advertencia -->
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Esta acción no se puede deshacer.
+                </div>
+                
+                <!-- Botones -->
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                        <a href="{% url 'clientes:lista_propiedades' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

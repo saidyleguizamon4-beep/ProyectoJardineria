@@ -15,5 +15,7 @@ urlpatterns = [
     # Propiedades
     path('propiedades/', views.lista_propiedades, name='lista_propiedades'),
     path('propiedades/crear/', views.crear_propiedad, name='crear_propiedad'),
-    
+    path('propiedades/<int:pk>/', views.detalle_propiedad, name='detalle_propiedad'),
+    path('propiedades/<int:pk>/editar/', views.editar_propiedad, name='editar_propiedad'),
+    path('propiedades/<int:pk>/eliminar/', views.eliminar_propiedad, name='eliminar_propiedad'),
 ]

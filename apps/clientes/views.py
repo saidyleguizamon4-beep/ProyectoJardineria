@@ -147,15 +147,28 @@ def eliminar_cliente(request, pk):
 @verificar_sesion
 def lista_propiedades(request):
     """Vista para listar propiedades"""
-    propiedades = Propiedad.objects.select_related('cliente').all()
+    tipo_filtro = request.GET.get('tipo', '')
+    buscar = request.GET.get('buscar', '')
+    
+    propiedades = Propiedad.objects.select_related('cliente')
+    
+    if tipo_filtro:
+        propiedades = propiedades.filter(tipo=tipo_filtro)
+    if buscar:
+        propiedades = propiedades.filter(direccion__icontains=buscar)
+    
+    propiedades = propiedades.order_by('-fecha_alta')
+    
     return render(request, 'clientes/lista_propiedades.html', {
-        'propiedades': propiedades
+        'propiedades': propiedades,
+        'tipo_filtro': tipo_filtro,
+        'buscar': buscar
     })
 
 
 @verificar_sesion
 def crear_propiedad(request):
-    """Vista para crear nueva propiedad"""
+    """Vista para crear propiedad"""
     clientes = Cliente.objects.filter(activo=True)
     
     if request.method == 'POST':
@@ -170,6 +183,8 @@ def crear_propiedad(request):
             errores.append('El cliente es requerido')
         if not direccion:
             errores.append('La dirección es requerida')
+        if not tipo:
+            errores.append('El tipo es requerido')
         
         if errores:
             for error in errores:
@@ -186,7 +201,6 @@ def crear_propiedad(request):
                 'clientes': clientes
             })
         
-        # Crear propiedad
         Propiedad.objects.create(
             cliente=cliente,
             direccion=direccion,
@@ -201,4 +215,65 @@ def crear_propiedad(request):
         'clientes': clientes
     })
 
+
+@verificar_sesion
+def detalle_propiedad(request, pk):
+    """Vista para ver detalles de propiedad"""
+    propiedad = get_object_or_404(Propiedad.objects.select_related('cliente'), pk=pk)
+    return render(request, 'clientes/detalle_propiedad.html', {
+        'propiedad': propiedad
+    })
+
+
+@verificar_sesion
+def editar_propiedad(request, pk):
+    """Vista para editar propiedad"""
+    propiedad = get_object_or_404(Propiedad, pk=pk)
+    clientes = Cliente.objects.all()
+    
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente', '').strip()
+        direccion = request.POST.get('direccion', '').strip()
+        tipo = request.POST.get('tipo', '').strip()
+        tamano = request.POST.get('tamano', '').strip()
+        activo = request.POST.get('activo', False)
+        
+        try:
+            cliente = Cliente.objects.get(id_cliente=cliente_id)
+        except Cliente.DoesNotExist:
+            messages.error(request, 'El cliente no existe')
+            return render(request, 'clientes/form_propiedad.html', {
+                'propiedad': propiedad,
+                'clientes': clientes
+            })
+        
+        propiedad.cliente = cliente
+        propiedad.direccion = direccion
+        propiedad.tipo = tipo
+        propiedad.tamano = tamano if tamano else None
+        propiedad.activo = bool(activo)
+        propiedad.save()
+        
+        messages.success(request, 'Propiedad actualizada correctamente')
+        return redirect('clientes:lista_propiedades')
+    
+    return render(request, 'clientes/form_propiedad.html', {
+        'propiedad': propiedad,
+        'clientes': clientes
+    })
+
+
+@verificar_sesion
+def eliminar_propiedad(request, pk):
+    """Vista para eliminar propiedad"""
+    propiedad = get_object_or_404(Propiedad, pk=pk)
+    
+    if request.method == 'POST':
+        propiedad.delete()
+        messages.success(request, 'Propiedad eliminada correctamente')
+        return redirect('clientes:lista_propiedades')
+    
+    return render(request, 'clientes/confirmar_eliminar_propiedad.html', {
+        'propiedad': propiedad
+    })
 

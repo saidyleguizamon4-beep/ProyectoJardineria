@@ -1,66 +1,229 @@
 <!-- agenda/templates/agenda/form_cita.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% if cita %}Editar{% else %}Nueva{% endif %} Cita{% endblock %}
+{% block page_title %}{% if cita %}Editar{% else %}Nueva{% endif %} Cita{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fas fa-calendar-plus"></i> {% if cita %}Editar{% else %}Nueva{% endif %} Cita</h2>
-    <a href="{% url 'agenda:lista_citas' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
-
 <div class="row">
+    <!-- Formulario Principal -->
     <div class="col-md-8">
-        <div class="card">
+        <div class="custom-card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-calendar"></i> Datos de la Cita</h5>
+                <i class="fas fa-calendar-plus"></i> 
+                {% if cita %}Editar{% else %}Programar{% endif %} Cita
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
                     
+                    <!-- Trabajo -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-briefcase"></i> Trabajo *
+                        </label>
+                        <select name="trabajo" class="form-select" required>
+                            <option value="">Seleccione trabajo</option>
+                            {% for t in trabajos %}
+                            <option value="{{ t.id_trabajo }}" {% if cita.trabajo_id == t.id_trabajo %}selected{% endif %}>
+                                #{{ t.id_trabajo }} - {{ t.propiedad.direccion }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Trabajo asociado a la cita</div>
+                    </div>
+                    
+                    <!-- Cliente -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> Cliente *
+                        </label>
+                        <select name="cliente" class="form-select" required>
+                            <option value="">Seleccione cliente</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.id_cliente }}" {% if cita.cliente_id == c.id_cliente %}selected{% endif %}>
+                                {{ c.nombre }} {{ c.apellido }} - {{ c.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Empleado -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-user-hard-hat"></i> Empleado *
+                        </label>
+                        <select name="empleado" class="form-select" required>
+                            <option value="">Seleccione empleado</option>
+                            {% for e in empleados %}
+                            <option value="{{ e.id_empleado }}" {% if cita.empleado_id == e.id_empleado %}selected{% endif %}>
+                                {{ e.nombre }} {{ e.apellido }} - {{ e.cargo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Fecha y Hora -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Cliente *</label>
-                                <select name="cliente" class="form-select" required>
-                                    <option value="">Seleccione cliente</option>
-                                    {% for c in clientes %}
-                                    <option value="{{ c.id_cliente }}" {% if cita.cliente_id == c.id_cliente %}selected{% endif %}>
-                                        {{ c.nombre }} {{ c.apellido }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                <label class="form-label">
+                                    <i class="fas fa-calendar"></i> Fecha *
+                                </label>
+                                <input type="date" 
+                                       name="fecha" 
+                                       class="form-control" 
+                                       value="{{ cita.fecha|default:'' }}"
+                                       required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Empleado</label>
-                                <select name="empleado" class="form-select">
-                                    <option value="">Sin asignar</option>
-                                    {% for e in empleados %}
-                                    <option value="{{ e.id_empleado }}" {% if cita.empleado_id == e.id_empleado %}selected{% endif %}>
-                                        {{ e.nombre }} {{ e.apellido }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i> Hora *
+                                </label>
+                                <input type="time" 
+                                       name="hora" 
+                                       class="form-control" 
+                                       value="{{ cita.hora|default:'08:00' }}"
+                                       min="08:00" max="18:00"
+                                       required>
+                                <div class="form-text">Horario: 8:00 AM - 6:00 PM</div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Fecha *</label>
-                                <input type="date" name="fecha" class="form-control" 
-                                       value="{{ cita.fecha|default:'' }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label">Hora *</label>
-                                <input type="time" name="hora" class="form-control" 
-                                       value="{{ cita.hora|default:'' }}" required>
-                            </div>
+                    <!-- Estado -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-toggle-on"></i> Estado de la Cita
+                        </label>
+                        <select name="estado_cita" class="form-select">
+                            <option value="pendiente" {% if cita.estado_cita == 'pendiente' %}selected{% endif %}>
+                                ⏳ Pendiente
+                            </option>
+                            <option value="confirmada" {% if cita.estado_cita == 'confirmada' %}selected{% endif %}>
+                                ✅ Confirmada
+                            </option>
+                            <option value="en_progreso" {% if cita.estado_cita == 'en_progreso' %}selected{% endif %}>
+                                🔄 En Progreso
+                            </option>
+                            <option value="completada" {% if cita.estado_cita == 'completada' %}selected{% endif %}>
+                                🏁 Completada
+                            </option>
+                            <option value="cancelada" {% if cita.estado_cita == 'cancelada' %}selected{% endif %}>
+                                ❌ Cancelada
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <!-- Comentarios -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-comment"></i> Comentarios
+                        </label>
+                        <textarea name="comentarios" 
+                                  class="form-control" 
+                                  rows="3"
+                                  placeholder="Notas adicionales...">{{ cita.comentarios|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Recordatorios -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-bell"></i> Recordatorios
+                        </label>
+                        <textarea name="recordatorios" 
+                                  class="form-control" 
+                                  rows="2"
+                                  placeholder="Notas para recordar...">{{ cita.recordatorios|default:'' }}</textarea>
+                    </div>
+                    
+                    <!-- Botones -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="fas fa-save"></i> 
+                            {% if cita %}Actualizar{% else %}Programar{% endif %} Cita
+                        </button>
+                        <a href="{% url 'agenda:lista_citas' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar Info -->
+    <div class="col-md-4">
+        <!-- Información -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i> Información
+            </div>
+            <div class="card-body">
+                {% if cita %}
+                <p><strong>Estado:</strong><br>
+                    {% if cita.estado_cita == 'pendiente' %}
+                        <span class="badge bg-warning">Pendiente</span>
+                    {% elif cita.estado_cita == 'confirmada' %}
+                        <span class="badge bg-success">Confirmada</span>
+                    {% elif cita.estado_cita == 'cancelada' %}
+                        <span class="badge bg-danger">Cancelada</span>
+                    {% else %}
+                        <span class="badge bg-info">{{ cita.estado_cita }}</span>
+                    {% endif %}
+                </p>
+                <hr>
+                {% endif %}
+                <p><strong>Creación:</strong><br>
+                    <span class="text-muted">{{ cita.fecha_creacion|date:"d/m/Y H:i"|default:"..." }}</span>
+                </p>
+                <hr>
+                <p class="text-muted small">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Los campos marcados con * son obligatorios
+                </p>
+            </div>
+        </div>
+        
+        <!-- Estados -->
+        <div class="custom-card mb-3">
+            <div class="card-header">
+                <i class="fas fa-list"></i> Estados de Cita
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-warning me-1"></span> Pendiente
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-success me-1"></span> Confirmada
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-primary me-1"></span> En Progreso
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-info me-1"></span> Completada
+                    </div>
+                    <div class="list-group-item px-0">
+                        <span class="badge bg-danger me-1"></span> Cancelada
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Horario -->
+        <div class="custom-card">
+            <div class="card-header">
+                <i class="fas fa-clock"></i> Horario
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Lunes a Viernes:</strong></p>
+                <p class="text-muted mb-2">8:00 AM - 6:00 PM</p>
+                <p class="mb-1"><strong>Sábados:</strong></p>
+                <p class="text-muted mb-0">8:00 AM - 12:00 PM</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
