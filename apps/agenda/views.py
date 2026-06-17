@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
-#from django.utils.date import date, time
 from apps.usuarios.views import verificar_sesion
 from apps.clientes.models import Cliente
 from apps.empleados.models import Empleado
