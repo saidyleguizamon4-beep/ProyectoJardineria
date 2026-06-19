@@ -8,6 +8,7 @@ from apps.usuarios.views import verificar_sesion
 from apps.clientes.models import Cliente
 from apps.empleados.models import Empleado
 from .models import AgendaCita
+from apps.trabajos.models import Trabajo
 
 # =============================================================================
 # CITAS
@@ -38,12 +39,14 @@ def crear_cita(request):
     clientes = Cliente.objects.filter(activo=True)
     empleados = Empleado.objects.filter(activo=True)
     
+    trabajos = Trabajo.objects.all().order_by('-fecha_inicio')
+
     if request.method == 'POST':
         cliente_id = request.POST.get('cliente', '').strip()
         empleado_id = request.POST.get('empleado', '').strip()
+        trabajo_id = request.POST.get('trabajo', '').strip()
         fecha = request.POST.get('fecha', '').strip()
         hora = request.POST.get('hora', '').strip()
-        motivo = request.POST.get('motivo', '').strip()
         comentarios = request.POST.get('comentarios', '').strip()
         
         errores = []
@@ -54,15 +57,17 @@ def crear_cita(request):
             errores.append('La fecha es requerida')
         if not hora:
             errores.append('La hora es requerida')
-        if not motivo:
-            errores.append('El motivo es requerido')
+        if not trabajo_id:
+            errores.append('El trabajo es requerido')
+
         
         if errores:
             for error in errores:
                 messages.error(request, error)
             return render(request, 'agenda/form_cita.html', {
                 'clientes': clientes,
-                'empleados': empleados
+                'empleados': empleados,
+                'trabajos': trabajos,
             })
         
         try:
@@ -71,25 +76,29 @@ def crear_cita(request):
             messages.error(request, 'El cliente no existe')
             return render(request, 'agenda/form_cita.html', {
                 'clientes': clientes,
-                'empleados': empleados
+                'empleados': empleados,
+                'trabajos': trabajos,
             })
-        
+
         empleado = None
         if empleado_id:
             try:
                 empleado = Empleado.objects.get(id_empleado=empleado_id)
             except Empleado.DoesNotExist:
                 pass
-        
+
+        trabajo = get_object_or_404(Trabajo, id_trabajo=trabajo_id)
+        estado_cita = request.POST.get('estado_cita', 'pendiente').strip() or 'pendiente'
+
         # Crear cita
         AgendaCita.objects.create(
+            trabajo=trabajo,
             cliente=cliente,
             empleado=empleado,
             fecha=fecha,
             hora=hora,
-            motivo=motivo,
             comentarios=comentarios,
-            estado_cita='pendiente'
+            estado_cita=estado_cita
         )
         
         messages.success(request, 'Cita creada correctamente')
@@ -97,7 +106,8 @@ def crear_cita(request):
     
     return render(request, 'agenda/form_cita.html', {
         'clientes': clientes,
-        'empleados': empleados
+        'empleados': empleados,
+        'trabajos': trabajos,
     })
 
 
@@ -122,7 +132,6 @@ def editar_cita(request, pk):
         empleado_id = request.POST.get('empleado', '').strip()
         fecha = request.POST.get('fecha', '').strip()
         hora = request.POST.get('hora', '').strip()
-        motivo = request.POST.get('motivo', '').strip()
         comentarios = request.POST.get('comentarios', '').strip()
         estado = request.POST.get('estado_cita', '').strip()
         
@@ -147,7 +156,6 @@ def editar_cita(request, pk):
         cita.empleado = empleado
         cita.fecha = fecha
         cita.hora = hora
-        cita.motivo = motivo
         cita.comentarios = comentarios
         cita.estado_cita = estado
         cita.save()
