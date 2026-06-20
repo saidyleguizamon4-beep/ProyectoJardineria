@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Trabajo - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Detalles del Trabajo #{{ trabajo.id_trabajo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-briefcase text-success"></i> Trabajo #{{ trabajo.id_trabajo }}</h2>
+        <p class="text-muted mb-0">Gestión de operaciones, servicios asignados y personal</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'trabajos:editar_trabajo' trabajo.id_trabajo %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar Trabajo
+        </a>
+        {% if not trabajo.factura %}
+        <a href="{% url 'facturacion:crear_factura' trabajo.id_trabajo %}" class="btn btn-primary">
+            <i class="fas fa-file-invoice-dollar"></i> Generar Factura
+        </a>
+        {% else %}
+        <a href="{% url 'facturacion:detalle_factura' trabajo.factura.id_factura %}" class="btn btn-outline-primary">
+            <i class="fas fa-eye"></i> Ver Factura ({{ trabajo.factura.numero_factura }})
+        </a>
+        {% endif %}
+        <a href="{% url 'trabajos:lista_trabajos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información General -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Ficha del Trabajo</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless align-middle mb-0">
+                    <tr>
+                        <th class="ps-0 text-muted" style="width: 45%;">Cliente:</th>
+                        <td>
+                            <a href="{% url 'clientes:detalle_cliente' trabajo.propiedad.cliente.id_cliente %}" class="text-decoration-none text-success">
+                                <strong>{{ trabajo.propiedad.cliente.nombre }} {{ trabajo.propiedad.cliente.apellido }}</strong>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Propiedad:</th>
+                        <td>
+                            <a href="{% url 'clientes:detalle_propiedad' trabajo.propiedad.id_propiedad %}" class="text-decoration-none text-success">
+                                {{ trabajo.propiedad.direccion }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Fecha Inicio:</th>
+                        <td>{{ trabajo.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Fecha Fin:</th>
+                        <td>{{ trabajo.fecha_fin|date:"d/m/Y H:i"|default:"En proceso" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Operarios Req.:</th>
+                        <td>{{ trabajo.num_trabajadores }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Estado:</th>
+                        <td>
+                            <span class="badge {% if trabajo.estado == 'pendiente' %}bg-warning{% elif trabajo.estado == 'asignado' %}bg-primary{% elif trabajo.estado == 'completado' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ trabajo.estado|capfirst }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                {% if trabajo.observaciones %}
+                <hr>
+                <h6>Observaciones:</h6>
+                <p class="text-muted small mb-0">{{ trabajo.observaciones }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Servicios del Trabajo -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-concierge-bell"></i> Servicios y Conceptos</h5>
+                <a href="{% url 'trabajos:agregar_servicio' trabajo.id_trabajo %}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus"></i> Agregar Servicio
+                </a>
+            </div>
+            <div class="card-body">
+                {% if servicios %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Servicio</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-end">Precio Unit.</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in servicios %}
+                            <tr>
+                                <td><strong>{{ s.servicio.nombre }}</strong></td>
+                                <td class="text-center">{{ s.cantidad }}</td>
+                                <td class="text-end">${{ s.precio_unitario }}</td>
+                                <td class="text-end"><strong>${{ s.subtotal }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="table-light">
+                                <td colspan="3" class="text-end"><strong>Importe Total:</strong></td>
+                                <td class="text-end text-success fs-5"><strong>${{ trabajo.importe_total }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-concierge-bell fa-3x text-muted mb-2"></i>
+                    <p class="text-muted">No se han registrado servicios para este trabajo.</p>
+                    <a href="{% url 'trabajos:agregar_servicio' trabajo.id_trabajo %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Agregar Servicio
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Personal Asignado -->
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users"></i> Operarios Asignados</h5>
+                <a href="{% url 'trabajos:asignar_empleado' trabajo.id_trabajo %}" class="btn btn-sm btn-light">
+                    <i class="fas fa-user-plus"></i> Asignar Empleado
+                </a>
+            </div>
+            <div class="card-body">
+                {% if asignaciones %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Fecha Asignación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asig in asignaciones %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'empleados:detalle_empleado' asig.empleado.id_empleado %}" class="text-decoration-none text-success">
+                                        <strong>{{ asig.empleado.nombre }} {{ asig.empleado.apellido }}</strong>
+                                    </a>
+                                    <br><span class="small text-muted">{{ asig.empleado.cargo }}</span>
+                                </td>
+                                <td>{{ asig.fecha_asignacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="badge {% if asig.estado == 'pendiente' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ asig.estado|capfirst }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if asig.estado == 'pendiente' %}
+                                    <form method="post" action="{% url 'trabajos:completar_asignacion' asig.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Completar Trabajo
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-muted small">Finalizado el {{ asig.hora_fin|date:"d/m/Y H:i" }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-2"></i>
+                    <p class="text-muted">No hay empleados asignados a este trabajo todavía.</p>
+                    <a href="{% url 'trabajos:asignar_empleado' trabajo.id_trabajo %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-user-plus"></i> Asignar Operario
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

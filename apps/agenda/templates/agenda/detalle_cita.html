@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Cita - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Detalles de la Cita{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-calendar-check text-success"></i> Cita #{{ cita.id_cita }}</h2>
+        <p class="text-muted mb-0">Detalles de la cita programada en agenda</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'agenda:editar_cita' cita.id_cita %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar Cita
+        </a>
+        <a href="{% url 'agenda:lista_citas' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información de la Cita -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-clock"></i> Programación e Información</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless align-middle mb-0">
+                    <tr>
+                        <th class="ps-0 text-muted" style="width: 35%;">Fecha:</th>
+                        <td><strong>{{ cita.fecha|date:"d/m/Y" }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Hora:</th>
+                        <td><strong>{{ cita.hora }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Estado Cita:</th>
+                        <td>
+                            <span class="badge {% if cita.estado_cita == 'pendiente' %}bg-warning{% elif cita.estado_cita == 'confirmada' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ cita.estado_cita|capfirst }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Trabajo Asociado:</th>
+                        <td>
+                            <a href="{% url 'trabajos:detalle_trabajo' cita.trabajo_id %}" class="text-decoration-none text-success">
+                                Trabajo #{{ cita.trabajo_id }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Creada el:</th>
+                        <td>{{ cita.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                </table>
+                {% if cita.comentarios %}
+                <hr>
+                <h6>Comentarios:</h6>
+                <p class="text-muted mb-0">{{ cita.comentarios|linebreaksbr }}</p>
+                {% endif %}
+                {% if cita.recordatorios %}
+                <hr>
+                <h6>Recordatorios:</h6>
+                <p class="text-danger mb-0">{{ cita.recordatorios|linebreaksbr }}</p>
+                {% endif %}
+                
+                <hr>
+                <form method="post" action="{% url 'agenda:cambiar_estado' cita.id_cita %}" class="d-flex align-items-center gap-2 mt-3">
+                    {% csrf_token %}
+                    <label class="form-label mb-0">Cambiar Estado:</label>
+                    <select name="estado_cita" class="form-select form-select-sm" style="width: auto;">
+                        <option value="pendiente" {% if cita.estado_cita == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="confirmada" {% if cita.estado_cita == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                        <option value="cancelada" {% if cita.estado_cita == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success">Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participantes (Cliente / Empleado) -->
+    <div class="col-md-6">
+        <!-- Cliente -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Cliente</h5>
+            </div>
+            <div class="card-body">
+                <h6>
+                    <a href="{% url 'clientes:detalle_cliente' cita.cliente.id_cliente %}" class="text-decoration-none text-success">
+                        <strong>{{ cita.cliente.nombre }} {{ cita.cliente.apellido }}</strong>
+                    </a>
+                </h6>
+                <p class="text-muted mb-1"><i class="fas fa-envelope"></i> {{ cita.cliente.email }}</p>
+                <p class="text-muted mb-1"><i class="fas fa-phone"></i> {{ cita.cliente.telefono }}</p>
+                <p class="text-muted mb-0"><i class="fas fa-map-marker-alt"></i> {{ cita.cliente.direccion }}</p>
+            </div>
+        </div>
+
+        <!-- Empleado Asignado -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-hard-hat"></i> Operario Asignado</h5>
+            </div>
+            <div class="card-body">
+                {% if cita.empleado %}
+                <h6>
+                    <a href="{% url 'empleados:detalle_empleado' cita.empleado.id_empleado %}" class="text-decoration-none text-success">
+                        <strong>{{ cita.empleado.nombre }} {{ cita.empleado.apellido }}</strong>
+                    </a>
+                </h6>
+                <p class="text-muted mb-1"><i class="fas fa-id-card"></i> {{ cita.empleado.cargo }}</p>
+                <p class="text-muted mb-0"><i class="fas fa-phone"></i> {{ cita.empleado.telefono }}</p>
+                {% else %}
+                <div class="text-center py-2 text-muted">
+                    <i class="fas fa-user-slash fa-2x mb-1 d-block"></i>
+                    Sin operario asignado en esta cita.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

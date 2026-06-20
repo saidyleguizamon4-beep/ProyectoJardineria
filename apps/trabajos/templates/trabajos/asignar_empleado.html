@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Asignar Empleado - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Asignar Empleado a Trabajo #{{ trabajo.id_trabajo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-user-plus text-success"></i> Asignar Personal Operativo</h2>
+        <p class="text-muted mb-0">Seleccione un empleado calificado para este trabajo</p>
+    </div>
+    <a href="{% url 'trabajos:detalle_trabajo' trabajo.id_trabajo %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al Trabajo
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-user-friends"></i> Operario</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Empleado *</label>
+                        <select name="empleado" class="form-select" required>
+                            <option value="">Seleccione un empleado...</option>
+                            {% for emp in empleados %}
+                                <option value="{{ emp.id_empleado }}">
+                                    {{ emp.nombre }} {{ emp.apellido }} ({{ emp.cargo }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Asignar Empleado
+                        </button>
+                        <a href="{% url 'trabajos:detalle_trabajo' trabajo.id_trabajo %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Datos del Trabajo</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Trabajo:</strong> #{{ trabajo.id_trabajo }}</p>
+                <p><strong>Propiedad:</strong> {{ trabajo.propiedad.direccion }}</p>
+                <p><strong>Cliente:</strong> {{ trabajo.propiedad.cliente.nombre }} {{ trabajo.propiedad.cliente.apellido }}</p>
+                <p><strong>Operarios Requeridos:</strong> {{ trabajo.num_trabajadores }}</p>
+                <hr>
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-lightbulb"></i> Solo los empleados configurados como "activos" aparecen en este listado.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

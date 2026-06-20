@@ -138,6 +138,8 @@ def crear_tarifa(request):
         nombre_tarifa = request.POST.get('nombre_tarifa', '').strip()
         precio = request.POST.get('precio', '').strip()
         duracion = request.POST.get('duracion_minutos', '').strip()
+        fecha_inicio = request.POST.get('fecha_inicio', '').strip()
+        fecha_fin = request.POST.get('fecha_fin', '').strip()
         
         errores = []
         
@@ -163,11 +165,17 @@ def crear_tarifa(request):
                 'servicios': servicios
             })
         
+        if not fecha_inicio:
+            from django.utils import timezone
+            fecha_inicio = timezone.now().date()
+            
         Tarifa.objects.create(
             servicio=servicio,
             nombre_tarifa=nombre_tarifa,
             precio=precio,
-            duracion_minutos=duracion if duracion else 60
+            duracion_minutos=duracion if duracion else 60,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin if fecha_fin else None
         )
         
         messages.success(request, 'Tarifa creada correctamente')
@@ -176,8 +184,8 @@ def crear_tarifa(request):
     return render(request, 'servicios/form_tarifa.html', {
         'servicios': servicios
     })
-
-
+ 
+ 
 @verificar_sesion
 def editar_tarifa(request, pk):
     """Vista para editar tarifa"""
@@ -189,6 +197,8 @@ def editar_tarifa(request, pk):
         nombre_tarifa = request.POST.get('nombre_tarifa', '').strip()
         precio = request.POST.get('precio', '').strip()
         duracion = request.POST.get('duracion_minutos', '').strip()
+        fecha_inicio = request.POST.get('fecha_inicio', '').strip()
+        fecha_fin = request.POST.get('fecha_fin', '').strip()
         activa = request.POST.get('activa', False)
         
         try:
@@ -204,6 +214,9 @@ def editar_tarifa(request, pk):
         tarifa.nombre_tarifa = nombre_tarifa
         tarifa.precio = precio
         tarifa.duracion_minutos = duracion if duracion else 60
+        if fecha_inicio:
+            tarifa.fecha_inicio = fecha_inicio
+        tarifa.fecha_fin = fecha_fin if fecha_fin else None
         tarifa.activa = bool(activa)
         tarifa.save()
         

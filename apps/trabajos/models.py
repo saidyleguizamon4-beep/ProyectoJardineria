@@ -29,6 +29,10 @@ class Trabajo(models.Model):
     
     def __str__(self):
         return f"Trabajo #{self.id_trabajo}"
+    
+    @property
+    def importe_total(self):
+        return sum(item.subtotal for item in self.servicios.all())
 
 
 class TrabajoServicio(models.Model):

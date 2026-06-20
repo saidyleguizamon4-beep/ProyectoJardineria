@@ -183,9 +183,10 @@ def eliminar_pago(request, pk):
     if request.method == 'POST':
         # Devolver estado de la factura
         factura = pago.factura
-        facturas.restante = float(factura.total) - float(pago.monto)
+        pagos_restantes = Pago.objects.filter(factura=factura).exclude(pk=pago.pk).aggregate(total=Sum('monto'))
+        total_pagado = float(pagos_restantes['total'] or 0)
         
-        if facturas.restante <= 0:
+        if total_pagado >= float(factura.total):
             factura.estado_pago = 'pagada'
         else:
             factura.estado_pago = 'pendiente'

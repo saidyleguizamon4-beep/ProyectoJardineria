@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Marcar Factura como Pagada - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Registrar Pago de Factura{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-check-circle"></i> Confirmar Pago de Factura</h5>
+            </div>
+            <div class="card-body text-center py-4">
+                <p class="fs-5">¿Desea marcar la factura <strong>{{ factura.numero_factura }}</strong> como <strong>PAGADA</strong>?</p>
+                <p class="text-muted mb-1">Cliente: {{ factura.trabajo.propiedad.cliente.nombre }} {{ factura.trabajo.propiedad.cliente.apellido }}</p>
+                <p class="text-muted mb-0">Total a pagar: <strong>${{ factura.total }}</strong></p>
+                <p class="text-muted small mt-2">Esta acción registrará que la factura ha sido abonada en su totalidad en el sistema.</p>
+                
+                <form method="post" class="mt-4 d-flex justify-content-center gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Marcar como Pagada
+                    </button>
+                    <a href="{% url 'facturacion:lista_facturas' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

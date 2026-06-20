@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Cliente - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Eliminar Cliente{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+            </div>
+            <div class="card-body text-center py-4">
+                <p class="fs-5">¿Está seguro de que desea eliminar al cliente <strong>{{ cliente.nombre }} {{ cliente.apellido }}</strong>?</p>
+                <p class="text-muted small">Esta acción eliminará el cliente de forma permanente del sistema. Si tiene facturas o citas pendientes, el sistema podría impedir la operación.</p>
+                
+                <form method="post" class="mt-4 d-flex justify-content-center gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Confirmar y Eliminar
+                    </button>
+                    <a href="{% url 'clientes:lista_clientes' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

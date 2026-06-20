@@ -37,7 +37,7 @@ class Propiedad(models.Model):
     )
     direccion = models.CharField(max_length=300)
     tipo = models.CharField(max_length=50)
-    tamano = models.DecimalField(max_digits=10, decimal_places=2)
+    tamano = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     tiene_jardin = models.BooleanField(default=False)
     observaciones = models.TextField(blank=True)
     fecha_alta = models.DateTimeField(auto_now_add=True)

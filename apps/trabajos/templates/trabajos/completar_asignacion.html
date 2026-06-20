@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Completar Asignación - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Completar Asignación{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-check-circle"></i> Finalizar Asignación de Trabajo</h5>
+            </div>
+            <div class="card-body">
+                <p class="fs-5 text-center">¿Desea marcar como completada la asignación del empleado <strong>{{ asignacion.empleado.nombre }} {{ asignacion.empleado.apellido }}</strong>?</p>
+                <p class="text-muted text-center small">Esta acción registrará la fecha y hora actuales como la finalización de sus labores para este trabajo.</p>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Horas Empleadas (Opcional):</label>
+                        <input type="number" name="horas_asignadas" class="form-control" value="1" min="1">
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Marcar como Completado
+                        </button>
+                        <a href="{% url 'trabajos:detalle_trabajo' asignacion.trabajo_id %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

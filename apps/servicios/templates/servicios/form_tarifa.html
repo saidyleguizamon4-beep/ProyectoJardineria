@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if tarifa %}Editar{% else %}Nueva{% endif %} Tarifa - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}{% if tarifa %}Editar{% else %}Crear{% endif %} Tarifa{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-tags text-success"></i> {% if tarifa %}Editar Tarifa{% else %}Nueva Tarifa{% endif %}</h2>
+        <p class="text-muted mb-0">Configure los detalles de precios del servicio</p>
+    </div>
+    <a href="{% url 'servicios:lista_tarifas' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-tag"></i> Datos de la Tarifa</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Servicio -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Servicio *</label>
+                            <select name="servicio" class="form-select" required {% if tarifa %}disabled{% endif %}>
+                                <option value="">Seleccione un servicio...</option>
+                                {% for serv in servicios %}
+                                    <option value="{{ serv.id_servicio }}" {% if tarifa.servicio_id == serv.id_servicio or request.GET.servicio|add:"0" == serv.id_servicio %}selected{% endif %}>
+                                        {{ serv.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if tarifa %}
+                                <!-- Campo oculto para mandar el id del servicio si está deshabilitado -->
+                                <input type="hidden" name="servicio" value="{{ tarifa.servicio_id }}">
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Nombre de Tarifa -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre de Tarifa *</label>
+                            <input type="text" name="nombre_tarifa" class="form-control" 
+                                   placeholder="Ej. Tarifa Plana, Tarifa Básica"
+                                   value="{{ tarifa.nombre_tarifa|default:'' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Precio -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Precio ($) *</label>
+                            <input type="number" step="0.01" name="precio" class="form-control" 
+                                   placeholder="0.00" value="{{ tarifa.precio|default:'' }}" required>
+                        </div>
+                        
+                        <!-- Duración Minutos -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Duración Estimada (minutos)</label>
+                            <input type="number" name="duracion_minutos" class="form-control" 
+                                   placeholder="60" value="{{ tarifa.duracion_minutos|default:'60' }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Fecha Inicio -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha de Inicio *</label>
+                            <input type="date" name="fecha_inicio" class="form-control" 
+                                   value="{% if tarifa.fecha_inicio %}{{ tarifa.fecha_inicio|date:'Y-m-d' }}{% else %}{% now 'Y-m-d' %}{% endif %}" required>
+                        </div>
+                        
+                        <!-- Fecha Fin -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fecha de Fin (Opcional)</label>
+                            <input type="date" name="fecha_fin" class="form-control" 
+                                   value="{% if tarifa.fecha_fin %}{{ tarifa.fecha_fin|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                    </div>
+
+                    {% if tarifa %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="activa" class="form-check-input" 
+                               id="activa" {% if tarifa.activa %}checked{% endif %}>
+                        <label class="form-check-label" for="activa">Tarifa activa</label>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> {% if tarifa %}Guardar Cambios{% else %}Crear Tarifa{% endif %}
+                        </button>
+                        <a href="{% url 'servicios:lista_tarifas' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Información</h5>
+            </div>
+            <div class="card-body">
+                <p>Las tarifas permiten asociar diferentes precios a un mismo servicio general (por ejemplo, precios por temporada o promociones).</p>
+                <hr>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-lightbulb"></i> Los campos marcados con * son obligatorios.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

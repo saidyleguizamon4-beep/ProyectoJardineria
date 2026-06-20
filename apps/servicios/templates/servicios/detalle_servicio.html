@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle Servicio - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Detalles del Servicio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-leaf text-success"></i> {{ servicio.nombre }}</h2>
+        <p class="text-muted mb-0">Información del servicio y tarifas configuradas</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'servicios:editar_servicio' servicio.id_servicio %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar Servicio
+        </a>
+        <a href="{% url 'servicios:lista_servicios' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Ficha del Servicio -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Ficha Técnica</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless align-middle mb-0">
+                    <tr>
+                        <th class="ps-0 text-muted" style="width: 40%;">ID Servicio:</th>
+                        <td>{{ servicio.id_servicio }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Nombre:</th>
+                        <td><strong>{{ servicio.nombre }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Duración Est.:</th>
+                        <td>{{ servicio.duracion_estimada_minutos }} minutos</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Estado:</th>
+                        <td>
+                            {% if servicio.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Fecha de Alta:</th>
+                        <td>{{ servicio.fecha_alta|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                </table>
+                <hr>
+                <h6>Descripción:</h6>
+                <p class="text-muted mb-0">{{ servicio.descripcion|linebreaksbr|default:"Sin descripción disponible." }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarifas del Servicio -->
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tags"></i> Tarifas del Servicio</h5>
+                <a href="{% url 'servicios:crear_tarifa' %}?servicio={{ servicio.id_servicio }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-plus"></i> Nueva Tarifa
+                </a>
+            </div>
+            <div class="card-body">
+                {% if tarifas %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Nombre Tarifa</th>
+                                <th>Precio</th>
+                                <th>Duración (min)</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tarifa in tarifas %}
+                            <tr>
+                                <td><strong>{{ tarifa.nombre_tarifa }}</strong></td>
+                                <td>${{ tarifa.precio }}</td>
+                                <td>{{ tarifa.duracion_minutos }} min</td>
+                                <td>
+                                    {% if tarifa.activa %}
+                                        <span class="badge bg-success">Activa</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactiva</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'servicios:editar_tarifa' tarifa.id_tarifa %}" class="btn btn-sm btn-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'servicios:eliminar_tarifa' tarifa.id_tarifa %}" class="btn btn-sm btn-danger" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-dollar-sign fa-3x text-muted mb-2"></i>
+                    <p class="text-muted">No hay tarifas configuradas para este servicio.</p>
+                    <a href="{% url 'servicios:crear_tarifa' %}?servicio={{ servicio.id_servicio }}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus"></i> Crear Tarifa
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

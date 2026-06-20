@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Pago - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Detalles del Pago{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-money-bill-wave text-success"></i> Pago #{{ pago.id_pago }}</h2>
+        <p class="text-muted mb-0">Detalles de la transacción registrada</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pagos:eliminar_pago' pago.id_pago %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Eliminar Registro
+        </a>
+        <a href="{% url 'pagos:lista_pagos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Pagos
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-receipt"></i> Información del Pago</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless align-middle mb-0">
+                    <tr>
+                        <th class="ps-0 text-muted" style="width: 40%;">ID Pago:</th>
+                        <td>#{{ pago.id_pago }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Factura Asociada:</th>
+                        <td>
+                            <a href="{% url 'facturacion:detalle_factura' pago.factura.id_factura %}" class="text-decoration-none text-success">
+                                <strong>{{ pago.factura.numero_factura }}</strong>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Método de Pago:</th>
+                        <td>{{ pago.metodo_pago.nombre }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Monto Abonado:</th>
+                        <td><strong class="text-success fs-5">${{ pago.monto }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Referencia:</th>
+                        <td>{{ pago.referencia|default:"Sin referencia" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Fecha de Pago:</th>
+                        <td>{{ pago.fecha_pago|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Fecha Registro:</th>
+                        <td>{{ pago.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th class="ps-0 text-muted">Estado Transacción:</th>
+                        <td>
+                            <span class="badge bg-success">{{ pago.estado|capfirst }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Cliente y Factura -->
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Cliente Relacionado</h5>
+            </div>
+            <div class="card-body">
+                <h6><strong>{{ pago.factura.trabajo.propiedad.cliente.nombre }} {{ pago.factura.trabajo.propiedad.cliente.apellido }}</strong></h6>
+                <p class="text-muted mb-1"><i class="fas fa-envelope"></i> {{ pago.factura.trabajo.propiedad.cliente.email }}</p>
+                <p class="text-muted mb-0"><i class="fas fa-map-marker-alt"></i> {{ pago.factura.trabajo.propiedad.direccion }}</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-file-invoice"></i> Resumen de la Factura</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-1">Número de Factura: <strong>{{ pago.factura.numero_factura }}</strong></p>
+                <p class="mb-1">Total de la Factura: <strong>${{ pago.factura.total }}</strong></p>
+                <p class="mb-0">Estado de Pago: 
+                    <span class="badge {% if pago.factura.estado_pago == 'pagada' %}bg-success{% else %}bg-warning{% endif %}">
+                        {{ pago.factura.estado_pago|capfirst }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

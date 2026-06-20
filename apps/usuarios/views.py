@@ -309,3 +309,61 @@ def crear_rol(request):
             return redirect('usuarios:lista_roles')
     
     return render(request, 'usuarios/form_rol.html')
+
+
+@verificar_sesion
+def dashboard_view(request):
+    """Vista para renderizar el Dashboard con datos reales"""
+    from apps.clientes.models import Cliente
+    from apps.empleados.models import Empleado
+    from apps.trabajos.models import Trabajo
+    from apps.facturacion.models import Factura
+    from apps.agenda.models import AgendaCita
+    from django.db.models import Sum
+    
+    # 1. Total Clientes Activos
+    total_clientes = Cliente.objects.filter(activo=True).count()
+    
+    # 2. Total Empleados Activos
+    total_empleados = Empleado.objects.filter(activo=True).count()
+    
+    # 3. Trabajos en Proceso (no completados)
+    trabajos_activos = Trabajo.objects.exclude(estado='completado').count()
+    
+    # 4. Ingresos Totales (suma del total de facturas pagadas)
+    ingresos = Factura.objects.filter(estado_pago='pagada').aggregate(total=Sum('total'))['total'] or 0
+    
+    # 5. Citas de hoy
+    hoy = timezone.now().date()
+    citas_hoy = AgendaCita.objects.filter(fecha=hoy).select_related('cliente', 'empleado').order_by('hora')
+    
+    # 6. Facturas Pendientes
+    facturas_pendientes = Factura.objects.filter(estado_pago='pendiente').select_related(
+        'trabajo', 'trabajo__propiedad', 'trabajo__propiedad__cliente'
+    ).order_by('-fecha_emision')[:5]
+    
+    # Calcular incremento mensual
+    primer_dia_mes = hoy.replace(day=1)
+    clientes_este_mes = Cliente.objects.filter(fecha_alta__date__gte=primer_dia_mes).count()
+    total_clientes_anterior = max(total_clientes - clientes_este_mes, 1)
+    porcentaje_clientes = int((clientes_este_mes / total_clientes_anterior) * 100)
+    
+    empleados_este_mes = Empleado.objects.filter(fecha_alta__date__gte=primer_dia_mes).count()
+    total_empleados_anterior = max(total_empleados - empleados_este_mes, 1)
+    porcentaje_empleados = int((empleados_este_mes / total_empleados_anterior) * 100)
+    
+    ingresos_este_mes = Factura.objects.filter(estado_pago='pagada', fecha_creacion__date__gte=primer_dia_mes).aggregate(total=Sum('total'))['total'] or 0
+    ingresos_anterior = max(float(ingresos) - float(ingresos_este_mes), 1)
+    porcentaje_ingresos = int((float(ingresos_este_mes) / ingresos_anterior) * 100)
+
+    return render(request, 'dashboard.html', {
+        'total_clientes': total_clientes,
+        'total_empleados': total_empleados,
+        'trabajos_activos': trabajos_activos,
+        'ingresos': ingresos,
+        'citas_hoy': citas_hoy,
+        'facturas_pendientes': facturas_pendientes,
+        'porcentaje_clientes': porcentaje_clientes,
+        'porcentaje_empleados': porcentaje_empleados,
+        'porcentaje_ingresos': porcentaje_ingresos,
+    })

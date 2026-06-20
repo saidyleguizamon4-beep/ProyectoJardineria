@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Tarifas - Jardinería Bogotá{% endblock %}
+
+{% block page_title %}Gestión de Tarifas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-tags text-success"></i> Catálogo de Tarifas</h2>
+        <p class="text-muted mb-0">Precios y paquetes configurados para los servicios</p>
+    </div>
+    <div>
+        <a href="{% url 'servicios:crear_tarifa' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Nueva Tarifa
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Tarifas</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Servicio</th>
+                        <th>Nombre Tarifa</th>
+                        <th>Precio</th>
+                        <th>Duración</th>
+                        <th>Vigencia</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tarifa in tarifas %}
+                    <tr>
+                        <td>{{ tarifa.id_tarifa }}</td>
+                        <td>
+                            <a href="{% url 'servicios:detalle_servicio' tarifa.servicio.id_servicio %}" class="text-decoration-none text-success">
+                                <strong>{{ tarifa.servicio.nombre }}</strong>
+                            </a>
+                        </td>
+                        <td>{{ tarifa.nombre_tarifa }}</td>
+                        <td><strong class="text-dark">${{ tarifa.precio }}</strong></td>
+                        <td>{{ tarifa.duracion_minutos }} min</td>
+                        <td>
+                            <span class="small text-muted">
+                                Desde: {{ tarifa.fecha_inicio|date:"d/m/Y" }}<br>
+                                {% if tarifa.fecha_fin %}
+                                    Hasta: {{ tarifa.fecha_fin|date:"d/m/Y" }}
+                                {% else %}
+                                    Indefinido
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if tarifa.activa %}
+                                <span class="badge bg-success">Activa</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'servicios:editar_tarifa' tarifa.id_tarifa %}" class="btn btn-sm btn-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'servicios:eliminar_tarifa' tarifa.id_tarifa %}" class="btn btn-sm btn-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="fas fa-tags fa-2x mb-2 d-block"></i>
+                            No hay tarifas registradas en el sistema.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
