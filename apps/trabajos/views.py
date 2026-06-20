@@ -168,7 +168,7 @@ def agregar_servicio_trabajo(request, pk):
     
     if request.method == 'POST':
         servicio_id = request.POST.get('servicio', '').strip()
-        cantidad = request.POST.get('cantidad', '1').strip()
+        cantidad = int(request.POST.get('cantidad', '1').strip() or 1)
         
         try:
             servicio = Servicio.objects.get(id_servicio=servicio_id)
@@ -190,7 +190,7 @@ def agregar_servicio_trabajo(request, pk):
             servicio=servicio,
             cantidad=cantidad,
             precio_unitario=precio,
-            subtotal=float(precio) * int(cantidad)
+            subtotal=precio * cantidad
         )
         
         messages.success(request, 'Servicio agregado correctamente')

@@ -76,7 +76,18 @@
                 <form method="post">
                     {% csrf_token %}
                     
-                    {% if not factura %}
+                    {% if factura %}
+                    <div class="mb-3">
+                        <label class="form-label">Número de Factura *</label>
+                        <input type="text" name="numero_factura" class="form-control" 
+                               value="{{ factura.numero_factura }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de Emisión *</label>
+                        <input type="date" name="fecha_emision" class="form-control" 
+                               value="{{ factura.fecha_emision|date:'Y-m-d' }}" required>
+                    </div>
+                    {% else %}
                     <div class="mb-3">
                         <label class="form-label">Número de Factura (Opcional)</label>
                         <input type="text" name="numero_factura" class="form-control" 

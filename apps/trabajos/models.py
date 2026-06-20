@@ -64,10 +64,10 @@ class TrabajoServicio(models.Model):
         verbose_name_plural = 'Trabajo Servicios'
     
     def __str__(self):
-        return f"{self.trabajo.id} - {self.servicio.nombre}"
+        return f"{self.trabajo.pk} - {self.servicio.nombre}"
     
     def save(self, *args, **kwargs):
-        self.subtotal = self.cantidad * self.precio_unitario
+        self.subtotal = int(self.cantidad) * self.precio_unitario
         super().save(*args, **kwargs)
 
 
@@ -95,4 +95,4 @@ class AsignacionTrabajo(models.Model):
         verbose_name_plural = 'Asignaciones Trabajo'
     
     def __str__(self):
-        return f"Trabajo #{self.trabajo.id} - Empleado #{self.empleado.id}"
+        return f"Trabajo #{self.trabajo.pk} - Empleado #{self.empleado.pk}"

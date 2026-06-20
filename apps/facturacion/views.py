@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Sum
+from decimal import Decimal
 from apps.usuarios.views import verificar_sesion
 from apps.trabajos.models import Trabajo, TrabajoServicio
 from .models import Factura
@@ -61,10 +62,10 @@ def crear_factura(request, trabajo_id):
                 num = 1
             num_factura = f"FAC-{num:05d}"
         
-        iva = float(request.POST.get('iva', '21').strip())
+        iva = Decimal(request.POST.get('iva', '21').strip())
         
         # Calcular total
-        iva_monto = subtotal * (iva / 100)
+        iva_monto = subtotal * (iva / Decimal('100'))
         total = subtotal + iva_monto
         
         Factura.objects.create(
@@ -109,12 +110,18 @@ def editar_factura(request, pk):
     factura = get_object_or_404(Factura, pk=pk)
     
     if request.method == 'POST':
-        iva = float(request.POST.get('iva', '21').strip())
+        numero_factura = request.POST.get('numero_factura', '').strip()
+        fecha_emision = request.POST.get('fecha_emision', '').strip()
+        iva = Decimal(request.POST.get('iva', '21').strip())
         
         # Recalcular total
-        iva_monto = factura.subtotal * (iva / 100)
+        iva_monto = factura.subtotal * (iva / Decimal('100'))
         total = factura.subtotal + iva_monto
         
+        if numero_factura:
+            factura.numero_factura = numero_factura
+        if fecha_emision:
+            factura.fecha_emision = fecha_emision
         factura.iva = iva
         factura.total = total
         factura.save()
@@ -124,7 +131,7 @@ def editar_factura(request, pk):
     
     return render(request, 'facturacion/form_factura.html', {
         'factura': factura,
-        'solo_lectura': True
+        'solo_lectura': False
     })
 
 

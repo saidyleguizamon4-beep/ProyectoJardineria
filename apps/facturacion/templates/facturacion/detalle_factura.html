@@ -8,9 +8,14 @@
     <div>
         <h2><i class="fas fa-file-invoice"></i> Factura {{ factura.numero_factura }}</h2>
     </div>
-    <a href="{% url 'facturacion:lista_facturas' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'facturacion:editar_factura' factura.id_factura %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar Factura
+        </a>
+        <a href="{% url 'facturacion:lista_facturas' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
 </div>
 
 <div class="row">
@@ -67,7 +72,7 @@
                     </tr>
                     <tr>
                         <th>IVA ({{ factura.iva }}%)</th>
-                        <td class="text-end">${{ factura.total|add:factura.subtotal|add:"-factura.total"|floatformat:2 }}</td>
+                        <td class="text-end" id="iva-monto-detalle">$-</td>
                     </tr>
                     <tr class="table-success">
                         <th><strong>TOTAL</strong></th>
@@ -109,9 +114,20 @@
                     <td>${{ servicio.precio_unitario|floatformat:2 }}</td>
                     <td>${{ servicio.subtotal|floatformat:2 }}</td>
                 </tr>
-                {% endfor %}
+                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const subtotal = parseFloat("{{ factura.subtotal|default:'0' }}");
+        const total = parseFloat("{{ factura.total|default:'0' }}");
+        const ivaMonto = total - subtotal;
+        document.getElementById("iva-monto-detalle").textContent = "$" + ivaMonto.toFixed(2);
+    });
+</script>
 {% endblock %}

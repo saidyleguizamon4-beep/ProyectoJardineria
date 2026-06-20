@@ -35,12 +35,17 @@
                     
                     <div class="mb-3">
                         <label class="form-label">Método de Pago *</label>
-                        <select name="metodo_pago" class="form-select" required>
-                            <option value="">Seleccione método</option>
-                            {% for m in metodos %}
-                            <option value="{{ m.id_metodo }}">{{ m.nombre }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="input-group">
+                            <select name="metodo_pago" class="form-select" required>
+                                <option value="">Seleccione método</option>
+                                {% for m in metodos %}
+                                <option value="{{ m.id_metodo }}">{{ m.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <a href="{% url 'pagos:crear_metodo_pago' %}" class="btn btn-outline-success" title="Registrar nuevo método de pago">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </a>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
