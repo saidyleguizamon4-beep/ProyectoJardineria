@@ -78,11 +78,11 @@
                         <td>{{ rol.id_rol }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                {% if rol.nombre_rol == 'admin' %}
+                                {% if rol.nombre_rol|lower == 'admin' or rol.nombre_rol|lower == 'administrador' %}
                                     <i class="fas fa-crown text-warning me-2"></i>
-                                {% elif rol.nombre_rol == 'supervisor' %}
+                                {% elif rol.nombre_rol|lower == 'supervisor' %}
                                     <i class="fas fa-user-tie text-primary me-2"></i>
-                                {% elif rol.nombre_rol == 'empleado' %}
+                                {% elif rol.nombre_rol|lower == 'empleado' %}
                                     <i class="fas fa-hard-hat text-success me-2"></i>
                                 {% else %}
                                     <i class="fas fa-user-friends text-info me-2"></i>

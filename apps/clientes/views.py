@@ -176,6 +176,8 @@ def crear_propiedad(request):
         direccion = request.POST.get('direccion', '').strip()
         tipo = request.POST.get('tipo', '').strip()
         tamano = request.POST.get('tamano', '').strip()
+        tiene_jardin = request.POST.get('tiene_jardin', False)
+        observaciones = request.POST.get('observaciones', '').strip()
         
         errores = []
         
@@ -205,7 +207,9 @@ def crear_propiedad(request):
             cliente=cliente,
             direccion=direccion,
             tipo=tipo,
-            tamano=tamano if tamano else None
+            tamano=tamano if tamano else None,
+            tiene_jardin=bool(tiene_jardin),
+            observaciones=observaciones
         )
         
         messages.success(request, 'Propiedad creada correctamente')
@@ -236,6 +240,8 @@ def editar_propiedad(request, pk):
         direccion = request.POST.get('direccion', '').strip()
         tipo = request.POST.get('tipo', '').strip()
         tamano = request.POST.get('tamano', '').strip()
+        tiene_jardin = request.POST.get('tiene_jardin', False)
+        observaciones = request.POST.get('observaciones', '').strip()
         activo = request.POST.get('activo', False)
         
         try:
@@ -251,6 +257,8 @@ def editar_propiedad(request, pk):
         propiedad.direccion = direccion
         propiedad.tipo = tipo
         propiedad.tamano = tamano if tamano else None
+        propiedad.tiene_jardin = bool(tiene_jardin)
+        propiedad.observaciones = observaciones
         propiedad.activo = bool(activo)
         propiedad.save()
         

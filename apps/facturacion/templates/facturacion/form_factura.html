@@ -98,7 +98,7 @@
                     <div class="mb-4">
                         <label class="form-label">IVA (%) *</label>
                         <select name="iva" class="form-select" id="iva-select" required>
-                            <option value="21" {% if factura.iva == 21 or not factura %}selected{% endif %}>21% (General)</option>
+                            <option value="19" {% if factura.iva == 19 or not factura %}selected{% endif %}>19% (General)</option>
                             <option value="10" {% if factura.iva == 10 %}selected{% endif %}>10% (Reducido)</option>
                             <option value="4" {% if factura.iva == 4 %}selected{% endif %}>4% (Superreducido)</option>
                             <option value="0" {% if factura.iva == 0 %}selected{% endif %}>0% (Exento)</option>

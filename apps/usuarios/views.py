@@ -241,7 +241,7 @@ def cambiar_password(request, pk):
     session_user_id = request.session.get('usuario_id')
     session_rol = request.session.get('rol')
     
-    if session_user_id != usuario.id_usuario and session_rol != 'admin':
+    if session_user_id != usuario.id_usuario and session_rol not in ['admin', 'Administrador']:
         messages.error(request, 'No tienes permisos para cambiar esta contraseña')
         return redirect('usuarios:lista_usuarios')
     
@@ -252,9 +252,12 @@ def cambiar_password(request, pk):
         
         errores = []
         
-        # Verificar contraseña actual
-        if password_actual != usuario.password:
-            errores.append('La contraseña actual es incorrecta')
+        # Verificar contraseña actual (solo si el propio usuario cambia su contraseña)
+        es_propio_usuario = (session_user_id == usuario.id_usuario)
+        if es_propio_usuario:
+            if password_actual != usuario.password:
+                errores.append('La contraseña actual es incorrecta')
+                
         if len(password_nueva) < 6:
             errores.append('La nueva contraseña debe tener al menos 6 caracteres')
         if password_nueva != password_nueva_confirm:
