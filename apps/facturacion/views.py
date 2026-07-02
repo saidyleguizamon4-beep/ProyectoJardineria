@@ -62,7 +62,7 @@ def crear_factura(request, trabajo_id):
                 num = 1
             num_factura = f"FAC-{num:05d}"
         
-        iva = Decimal(request.POST.get('iva', '21').strip())
+        iva = Decimal(request.POST.get('iva', '19').strip())
         
         # Calcular total
         iva_monto = subtotal * (iva / Decimal('100'))
@@ -112,7 +112,7 @@ def editar_factura(request, pk):
     if request.method == 'POST':
         numero_factura = request.POST.get('numero_factura', '').strip()
         fecha_emision = request.POST.get('fecha_emision', '').strip()
-        iva = Decimal(request.POST.get('iva', '21').strip())
+        iva = Decimal(request.POST.get('iva', '19').strip())
         
         # Recalcular total
         iva_monto = factura.subtotal * (iva / Decimal('100'))

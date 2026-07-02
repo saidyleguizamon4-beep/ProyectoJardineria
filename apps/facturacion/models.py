@@ -15,7 +15,7 @@ class Factura(models.Model):
     numero_factura = models.CharField(max_length=50, unique=True)
     fecha_emision = models.DateField()
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
-    iva = models.DecimalField(max_digits=5, decimal_places=2, default=21)
+    iva = models.DecimalField(max_digits=5, decimal_places=2, default=19)
     total = models.DecimalField(max_digits=12, decimal_places=2)
     estado_pago = models.CharField(max_length=50, default='pendiente')
     fecha_creacion = models.DateTimeField(auto_now_add=True)
