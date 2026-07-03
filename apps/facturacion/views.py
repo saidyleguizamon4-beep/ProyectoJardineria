@@ -171,3 +171,32 @@ def marcar_pagada(request, pk):
     })
 
 
+@verificar_sesion
+def seleccionar_trabajo(request):
+    """Vista para seleccionar un trabajo que requiera facturación (no tenga factura asociada)"""
+    trabajos = Trabajo.objects.filter(factura__isnull=True).select_related('propiedad', 'propiedad__cliente').order_by('-fecha_inicio')
+    return render(request, 'facturacion/seleccionar_trabajo.html', {
+        'trabajos': trabajos
+    })
+
+
+@verificar_sesion
+def imprimir_factura(request, pk):
+    """Vista para ver e imprimir una factura en un formato formal e imprimible"""
+    factura = get_object_or_404(Factura.objects.select_related('trabajo', 'trabajo__propiedad', 'trabajo__propiedad__cliente'), pk=pk)
+    servicios = factura.trabajo.servicios.all()
+    
+    # Calcular el monto del IVA en backend para pasar al contexto
+    subtotal = factura.subtotal
+    total = factura.total
+    iva_monto = total - subtotal
+    
+    return render(request, 'facturacion/imprimir_factura.html', {
+        'factura': factura,
+        'servicios': servicios,
+        'iva_monto': iva_monto
+    })
+
+
+
+
