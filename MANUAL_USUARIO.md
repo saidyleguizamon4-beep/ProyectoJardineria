@@ -20,6 +20,7 @@
     - [Registro de Pagos](#registro-de-pagos)
 5. [Procedimientos Paso a Paso (Flujo de Trabajo Operativo)](#5-procedimientos-paso-a-paso-flujo-de-trabajo-operativo)
     - [Diagrama de Flujo del Proceso](#diagrama-de-flujo-del-proceso)
+    - [Paso 0: Configuración de Roles y Usuarios](#paso-0-configuración-de-roles-y-usuarios)
     - [Paso 1: Alta de un Cliente y su Propiedad](#paso-1-alta-de-un-cliente-y-su-propiedad)
     - [Paso 2: Configuración del Catálogo de Servicios y Tarifas](#paso-2-configuración-del-catálogo-de-servicios-y-tarifas)
     - [Paso 3: Creación de un Trabajo Operativo](#paso-3-creación-de-un-trabajo-operativo)
@@ -27,6 +28,8 @@
     - [Paso 5: Agendamiento de la Cita](#paso-5-agendamiento-de-la-cita)
     - [Paso 6: Finalización de Trabajo y Facturación](#paso-6-finalización-de-trabajo-y-facturación)
     - [Paso 7: Registro del Pago de la Factura](#paso-7-registro-del-pago-de-la-factura)
+6. [Recomendaciones de Uso del Sistema](#6-recomendaciones-de-uso-del-sistema)
+7. [Preguntas Frecuentes (FAQ)](#7-preguntas-frecuentes-faq)
 
 ---
 
@@ -151,6 +154,31 @@ graph TD
 
 ---
 
+### Paso 0: Configuración de Roles y Usuarios
+
+Antes de registrar empleados o clientes que requieran acceso al sistema, es recomendable definir los roles del sistema y luego dar de alta las cuentas de usuario.
+
+#### A. Crear un nuevo Rol de Usuario:
+1. Diríjase a la sección **Sistema** en la parte inferior del menú lateral.
+2. Haga clic en la opción **Configuración** (esto le llevará al listado de Roles del Sistema `/usuarios/roles/`).
+3. En la pantalla de Gestión de Roles, haga clic en el botón **Nuevo Rol** (esquina superior derecha).
+4. Rellene el formulario con los siguientes campos:
+   * **Nombre del Rol:** El identificador del rol (debe ser único y sin espacios, por ejemplo: `supervisor_campo`, `auxiliar_jardin`).
+   * **Descripción:** Un texto breve que describa la función o el alcance de este rol.
+5. Haga clic en el botón **Crear Rol**. El sistema guardará el nuevo rol y lo redirigirá a la lista de roles activos.
+
+#### B. Crear un nuevo Usuario asignado a un Rol:
+1. Diríjase al menú lateral, sección **Gestión**, y haga clic en **Usuarios**.
+2. Haga clic en el botón **Crear Usuario** en la esquina superior derecha.
+3. Rellene el formulario con la información solicitada:
+   * **Usuario (Username):** Nombre único de inicio de sesión.
+   * **Rol:** Seleccione el rol deseado del menú desplegable.
+   * **Contraseña** y **Confirmar Contraseña** (debe tener al menos 6 caracteres).
+   * **Autenticación (Permitir inicio de sesión):** Asegúrese de marcar esta casilla si desea que el usuario acceda a la plataforma.
+4. Haga clic en el botón **Crear Usuario**.
+
+---
+
 ### Paso 1: Alta de un Cliente y su Propiedad
 
 Antes de programar cualquier trabajo, es obligatorio registrar al cliente y el terreno donde se prestará el servicio.
@@ -251,6 +279,42 @@ El paso final cierra el ciclo financiero ingresando el dinero a la empresa.
    * La factura asociada pasará automáticamente a estado `pagada`.
    * Los ingresos del Dashboard general se incrementarán con el total de esta factura.
 5. Para verificar el flujo de caja global, vaya a la sección **Reportes** dentro de **Pagos**, donde podrá visualizar resúmenes gráficos y tabulares del dinero recaudado por método de pago y rango de fechas.
+
+---
+
+## 6. Recomendaciones de Uso del Sistema
+
+Para garantizar una experiencia óptima y mantener la integridad de los datos de su empresa en **GardenPro**, le sugerimos seguir estas directrices de uso:
+
+* **Respetar la secuencia lógica del flujo:** Siempre registre en primer lugar los roles, usuarios, clientes y propiedades antes de intentar abrir órdenes de trabajo o citas en la agenda. Esto evita listas desplegables vacías y advertencias del sistema.
+* **Desactivar en lugar de eliminar:** Si un cliente, empleado o usuario deja de tener relación con la empresa, no los elimine. Desmarque la casilla de **Activo** (o desactive la **Autenticación** en usuarios). Esto preservará el historial de trabajos y cobros del pasado en la base de datos para auditorías financieras.
+* **Mantenimiento preventivo del catálogo de tarifas:** Verifique periódicamente que los servicios tengan configurada al menos una tarifa activa y vigente (fechas de inicio y fin correctas). De esto depende que los subtotales en trabajos y facturas se calculen automáticamente sin intervención manual.
+* **Registro inmediato de cobros:** Cuando reciba un pago, regístrelo de inmediato en el módulo de **Pagos** para cerrar el ciclo financiero de la factura asociada. Esto mantendrá al día los gráficos de ingresos y las estadísticas de flujo de caja en tiempo real del Dashboard.
+* **Validación de documentos:** Antes de dar de alta a un nuevo empleado, utilice la herramienta de validación de documentos para asegurarse de que el formato sea el correcto y evitar registros duplicados.
+* **Monitoreo diario del Dashboard:** Acostúmbrese a utilizar el Dashboard como su pantalla de inicio operativa. Le brindará una vista rápida de las citas técnicas de la jornada y de aquellas facturas pendientes de cobro que requieren gestiones de cobro urgentes.
+
+---
+
+## 7. Preguntas Frecuentes (FAQ)
+
+### ¿Por qué no puedo generar una factura para un trabajo que acabo de crear?
+Para que el sistema permita generar una factura desde el módulo de Facturación, la orden de trabajo asociada debe cumplir con dos requisitos previos:
+1. Debe tener al menos un servicio con tarifa asignada en la sección **Servicios del Trabajo**.
+2. Su estado general debe haberse modificado a **Completado** tras culminar las tareas operativas.
+
+### ¿Qué ocurre si elimino un cliente o empleado con historial financiero en el sistema?
+No se recomienda la eliminación física de registros. Si elimina un cliente o empleado que ya tiene facturas o pagos asociados, podría romper la integridad referencial de los reportes y causar fallos en las estadísticas. En su lugar, edite el perfil y desmarque la casilla **Activo**. El sistema los ocultará de las operaciones diarias pero mantendrá a salvo todo su historial para consultas contables.
+
+### ¿Cómo cambio la contraseña de un usuario o del personal?
+Diríjase a **Gestión -> Usuarios**. Haga clic en el botón de detalle (ojo) al lado del usuario en cuestión y seleccione la opción **Cambiar Contraseña**. 
+* Si tiene rol de **Administrador**, podrá asignar una nueva clave directamente sin conocer la actual.
+* Si es un usuario normal cambiando su propia contraseña, el sistema le solicitará ingresar su clave actual por motivos de seguridad antes de autorizar el cambio.
+
+### ¿Por qué un servicio no se muestra con el precio correcto al agregarlo a un trabajo?
+Esto sucede cuando el servicio seleccionado no tiene una tarifa activa o la fecha de inicio de la tarea no se encuentra dentro del rango de vigencia configurado en la tarifa. Ingrese a **Servicios -> Tarifas**, busque la tarifa asociada y verifique que la casilla **Activa** esté marcada y las fechas de vigencia incluyan la fecha actual del servicio.
+
+### ¿Qué debo hacer si una cita en la agenda debe reprogramarse?
+Diríjase al módulo de **Agenda** y ubique la cita. Haga clic en **Editar** para cambiar el día o la hora del servicio. Se recomienda cambiar temporalmente el estado de la cita a `Pendiente` hasta confirmar la disponibilidad horaria con el cliente y el empleado asignado, volviendo a marcarla como `Confirmada` una vez acordada la nueva fecha.
 
 ---
 

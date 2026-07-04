@@ -1,4 +1,4 @@
-<!-- usuarios/templates/usuarios/confirmar_eliminar_rol.html -->
+<!-- usuarios/templates/usuarios/confirmar_eliminar.html -->
 {% extends 'base.html' %}
 
 {% block page_title %}Confirmar Eliminación{% endblock %}
@@ -13,22 +13,15 @@
             <div class="card-body text-center">
                 <i class="fas fa-user-times fa-4x text-danger mb-3"></i>
                 
-                <h4>¿Está seguro de eliminar el rol?</h4>
+                <h4>¿Está seguro de eliminar el usuario?</h4>
                 
                 <div class="custom-card mt-3">
                     <div class="card-body">
-                        <i class="fas fa-tag text-danger me-2"></i>
-                        <strong>{{ rol.nombre_rol }}</strong>
-                        <p class="text-muted mb-0">{{ rol.descripcion|default:'' }}</p>
+                        <i class="fas fa-user text-danger me-2"></i>
+                        <strong>{{ usuario.username }}</strong>
+                        <p class="text-muted mb-0">Rol: {{ usuario.rol.nombre_rol }}</p>
                     </div>
                 </div>
-                
-                {% if rol.usuarios.count > 0 %}
-                <div class="alert alert-warning mt-3">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <strong>Advertencia:</strong> Este rol tiene {{ rol.usuarios.count }} usuario(s) asignado(s).
-                </div>
-                {% endif %}
                 
                 <div class="alert alert-danger mt-3">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -41,7 +34,7 @@
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
-                        <a href="{% url 'usuarios:lista_roles' %}" class="btn btn-secondary">
+                        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary">
                             Cancelar
                         </a>
                     </div>

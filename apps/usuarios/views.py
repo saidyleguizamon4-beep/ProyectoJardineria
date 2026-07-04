@@ -290,8 +290,13 @@ def cambiar_password(request, pk):
 def lista_roles(request):
     """Vista para listar roles"""
     roles = Roles.objects.all().order_by('nombre_rol')
+    total_usuarios = Usuario.objects.count()
+    from django.db.models import Q
+    total_admins = Usuario.objects.filter(Q(rol__nombre_rol__iexact='admin') | Q(rol__nombre_rol__iexact='administrador')).count()
     return render(request, 'usuarios/lista_roles.html', {
-        'roles': roles
+        'roles': roles,
+        'total_usuarios': total_usuarios,
+        'total_admins': total_admins
     })
 
 
